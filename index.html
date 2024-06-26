@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1">
+  <title>Join</title>
+  <link rel="icon" href="img/join-favicon.png" type="image/x-icon">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="fonts/inter.css">
+</head>
+
+<body onload="renderSection('login')">
+  <img class="login-logo" src="img/join-logo-signup.svg" alt="Join Logo">
+
+  <div class="content" id="content">
+    <div class="login-signup" id="login-signup">
+      <span class="login-signup-text">Not a Join user?</span>
+      <button class="main-button main-button-signup" onclick="renderSection('register')">
+        Sign up
+      </button>
+    </div>
+    
+    <div class="container" id="container">
+    </div>
+
+    <footer>
+      <div class="footer-container">
+        <a class="footer-link" href="privacy_policy_guest.html" target="_blank">Privacy Policy</a>
+        <a class="footer-link" href="legal_notice_guest.html" target="_blank">Legal Notice</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/login_templates.js"></script>
+  <script src="js/login_error.js"></script>
+  <script src="js/login.js"></script>
+  <script src="js/demoData.js"></script>
+  <script src="js/script.js"></script>
+</body>
+
+</html>

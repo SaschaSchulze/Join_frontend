@@ -1,0 +1,114 @@
+p, li {
+  font-family: 'OpenSans';
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+
+}
+
+.content {
+  margin-left: 328px;
+  margin-top: 110px;
+  width: calc(100% - 422px);
+ 
+}
+
+.content h1 {
+  font-family: 'Inter';
+  font-size: 61px;
+  font-weight: 700;
+  margin-block: unset;
+}
+
+.content h2 {
+  font-family: 'Inter';
+  font-size: 27px;
+  font-weight: 700;
+  margin-block: unset;
+}
+
+.content h3 {
+  margin-block: unset;
+  margin-top: 8px;
+}
+
+.content a {
+  text-decoration: none;
+  color: #29abe2;
+}
+
+.content a:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.content p {
+  margin-block: unset;
+  margin-bottom: 24px;
+}
+
+.blue {
+  color: #29abe2;
+}
+
+.backArrowLegal {
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+}
+
+.backArrowLegal:hover {
+  cursor: pointer;
+  background-color: #eeeeee;
+  transform: scale(1.1);
+}
+
+/* Media Queries */
+@media only screen and (max-width: 600px) {
+  p, li {
+    font-size: 14px;
+  }
+
+  .headline {
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .content {
+    margin-left: 20px;
+    margin-top: 60px;
+    margin-bottom: 200px;
+    width: calc(100% - 40px);
+  }
+
+  .content h1 {
+    font-size: 48px;
+  }
+
+  .content h2 {
+    font-size: 24px;
+  }
+
+  .content h3 {
+    margin-top: 4px;
+  }
+
+  .content p {
+    margin-bottom: 20px;
+  }
+
+  .backArrowLegal {
+    width: 30px;
+    height: 30px;
+  }
+
+  .backArrowLegal:hover {
+    transform: scale(1.05);
+  }
+}

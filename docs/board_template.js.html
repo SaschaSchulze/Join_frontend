@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: board_template.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: board_template.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>//import { contacts } from './js/add-task.js';
+
+/**
+ * Generates HTML for the Add Task modal.
+ * @returns {string} - HTML code for the Add Task modal.
+ */
+function addTaskModalHTML(column) {
+    return /*html*/ `
+    &lt;div id="overlay">&lt;/div>
+    &lt;form id="taskModal" class="add-task-create-open">
+        &lt;div class="modal-headline">Add task&lt;/div>
+        &lt;div onclick="closeModal()">
+        &lt;img class="close-modal" src="img/close_modal.svg" alt="">
+        &lt;/div>
+        &lt;div class="Add-task-content">
+            &lt;div class="Add-task-left-modal">
+                &lt;div class="title-container">
+                    &lt;div class="title">Title&lt;/div>
+                    &lt;input id="taskTitleInput" type="text" class="title-input" placeholder="Enter a title" required>
+                    &lt;div class="required-info">This field is required&lt;/div>
+                &lt;/div>
+
+                &lt;div class="description-container">
+                    &lt;div class="description">Description&lt;/div>
+                    &lt;input id="descriptionInput" type="text" class="description-input" placeholder="Enter a Description">
+                    &lt;div class="required-info">This field is required&lt;/div>
+                &lt;/div>
+
+                &lt;div class="assigned-to-container">
+                    &lt;div class="assigned-to">Assigned to&lt;/div>
+                    &lt;div class="input-container">
+                        &lt;input id="assignedTo" type="text" class="assigned-dropdown" placeholder="Select contacts to assign">
+                        &lt;img id="arrow_img_contacts" onclick="toggleArrowContacts()" class="arrow_down" src="img/arrow_down.svg" alt="">
+                        &lt;div id="contactDropdown" class="dropdown-content">&lt;/div>
+                    &lt;/div>
+
+                    &lt;div id="selectedContactsContainer">&lt;/div>
+                    &lt;div class="input-container">
+                    &lt;div class="dropdown-content">&lt;/div>
+                    &lt;div class="arrow_down">&lt;/div>
+                    &lt;/div>
+                &lt;/div>
+                &lt;div class="required-legend-modal">This field is required&lt;/div>
+            &lt;/div>
+
+            &lt;div class="divider">
+                &lt;img src="img/divider.svg" alt="">
+            &lt;/div>
+
+            &lt;div class="Add-task-right-modal">
+                &lt;div class="due-date-container">
+                    &lt;div class="due-date">Due date&lt;/div>
+                    &lt;input id="date" class="due-date-input" type="text" placeholder="dd/mm/yyyy" required />
+                &lt;/div>
+
+                &lt;div class="prio-container">
+                    &lt;div class="prio">Prio&lt;/div>
+
+                    &lt;div class="prio-option-container">
+                    &lt;button
+                        type="button"
+                        onclick="choose('urgent')"
+                        class="button urgent">
+                        &lt;h3>Urgent&lt;/h3>
+                        &lt;img src="img/Prio_up.svg" alt="" />
+                    &lt;/button>
+                    &lt;button
+                        type="button"
+                        onclick="choose('medium')"
+                        class="button medium">
+                        &lt;h3>Medium&lt;/h3>
+                        &lt;img src="img/Prio_neutral.svg" alt="" />
+                    &lt;/button>
+                    &lt;button type="button" onclick="choose('low')" class="button low">
+                        &lt;h3>Low&lt;/h3>
+                        &lt;img src="img/Prio_down.svg" alt="" />
+                    &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;div class="category-container">
+                    &lt;div class="category">Category&lt;/div>
+                    &lt;div class="input-container">
+                        &lt;input id="category" class="category-dropdown" type="text" placeholder="Select task category">
+                        &lt;img id="arrow_img_category" class="arrow_down_category" src="img/arrow_down.svg" onclick="toggleArrowCategory()" alt="" />
+                        &lt;div class="category-options" id="categoryOptions">
+                            &lt;label onclick="updateSelectedCategory('Technical task')">
+                                Technical task
+                            &lt;/label>
+                            &lt;label onclick="updateSelectedCategory('User Story')">
+                                User Story
+                            &lt;/label>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;div class="subtasks-container">
+                    &lt;div class="subtasks-add-task">Subtasks&lt;/div>
+                    &lt;div class="input-container-subtask">
+                        &lt;input class="subtasks-input" type="text" id="newSubtaskInput" placeholder="Add new subtask" id="subtask">
+                        &lt;div id="iconContainer">
+                            &lt;img class="add-icon" src="img/Subtasks icons11.svg" alt="" />
+                        &lt;/div>   
+                    &lt;/div>
+                    &lt;div class="subtask-list" id="subtaskList">&lt;/div>
+                &lt;/div>
+
+                &lt;div class="clear-and-create-section-modal">
+                    &lt;button onclick="clearFields()" class="cancel-button-modal">
+                        &lt;h3>Cancel&lt;/h3>
+                        &lt;svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            &lt;g id="iconoir:cancel">
+                            &lt;path id="Vector" d="M12.2496 11.9998L17.4926 17.2428M7.00659 17.2428L12.2496 11.9998L7.00659 17.2428ZM17.4926 6.75684L12.2486 11.9998L17.4926 6.75684ZM12.2486 11.9998L7.00659 6.75684L12.2486 11.9998Z" stroke="#2A3647" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            &lt;/g>
+                        &lt;/svg>
+                    &lt;/button>
+
+                    &lt;button class="create-task-button-modal" onclick="addToBoardModal('${column}')">
+                        &lt;h3>Create Task&lt;/h3>
+                        &lt;svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            &lt;g id="check">
+                            &lt;mask id="mask0_126260_6098" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                            &lt;rect id="Bounding box" x="0.248535" width="24" height="24" fill="#D9D9D9"/>
+                            &lt;/mask>
+                            &lt;g mask="url(#mask0_126260_6098)">
+                            &lt;path id="check_2" d="M9.79923 15.15L18.2742 6.675C18.4742 6.475 18.7117 6.375 18.9867 6.375C19.2617 6.375 19.4992 6.475 19.6992 6.675C19.8992 6.875 19.9992 7.1125 19.9992 7.3875C19.9992 7.6625 19.8992 7.9 19.6992 8.1L10.4992 17.3C10.2992 17.5 10.0659 17.6 9.79923 17.6C9.53256 17.6 9.29923 17.5 9.09923 17.3L4.79923 13C4.59923 12.8 4.5034 12.5625 4.51173 12.2875C4.52006 12.0125 4.62423 11.775 4.82423 11.575C5.02423 11.375 5.26173 11.275 5.53673 11.275C5.81173 11.275 6.04923 11.375 6.24923 11.575L9.79923 15.15Z" fill="white"/>
+                            &lt;/g>
+                            &lt;/g>
+                        &lt;/svg>
+                    &lt;/button>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+        &lt;div class="overlay-feedback" id="overlayFeedack">&lt;/div>
+    &lt;/form>
+    &lt;div class="animated-icon" id="animatedIcon">
+        &lt;img src="img/added_to_board.svg" alt="Added to Board">
+    &lt;/div>
+    `;
+}
+
+/**
+ * Generates HTML code for the opened task card modal.
+ * @param {Object} data - Task data.
+ * @param {string} taskId - Task ID.
+ * @param {string} categoryClass - CSS class for the task category.
+ * @param {string} priority - Task priority.
+ * @param {string} priorityIconSrc - Source path for the priority icon.
+ * @param {Object} selectedContacts - Selected contacts for the task.
+ * @returns {string} - HTML code for the opened task card modal.
+ */
+function openTaskHTML(data, taskId, categoryClass, priority, priorityIconSrc, selectedContacts, isSelected) {
+    return  /*html*/`
+    &lt;div id="card-overlay">&lt;/div>
+    &lt;div id="cardModal_${taskId}" class="card-modal">
+
+        &lt;div class="task-categorie">
+            &lt;p class=${categoryClass}>${data.content.category}&lt;/p>
+            &lt;div class="close-card-modal" onclick="closeOpenCard()">
+                &lt;img src="img/close_modal.svg" alt="">
+            &lt;/div>
+        &lt;/div>
+        &lt;div class="card-modal-cont">
+        &lt;div class="card-modal-title-container">
+            &lt;p class="card-modal-title">${data.content.title}&lt;/p>
+        &lt;/div>
+        &lt;p class="card-modal-content">${data.content.description}&lt;/p>
+
+        &lt;div class="card-modal-date">
+            &lt;p class="due-date-card-modal">Due date: 
+                &lt;p id="dueDateText">${data.content.date}&lt;/p>
+            &lt;/p> 
+        &lt;/div>
+
+        &lt;div class="card-modal-priority">
+            &lt;p class="priority-card-modal-text">Priority:&lt;/p> 
+            &lt;div class="card-modal-priority-container">
+                &lt;span class="card-modal-priority-letter">${priority}&lt;/span>
+                &lt;div class="card-modal-priority-symbol">
+                    &lt;img src="${priorityIconSrc}" alt="">
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+
+        &lt;div class="card-modal-contacts">
+            &lt;p class="card-modal-assigned-to-headline">Assigned to:&lt;/p>
+            &lt;div class="card-modal-contacts-container">
+                &lt;div id="selectedContactsContainerEdit" class="card-modal-initial-container">
+                    ${(selectedContacts || []).map(contact => `
+                        &lt;div class="initial-container-open-card" data-id="${contact.id}">
+                            &lt;div class="avatar">
+                                &lt;img src="${contact.imagePath}" alt="Avatar">
+                                &lt;div class="avatar_initletter">${contact.initials}&lt;/div>
+                            &lt;/div>
+                            &lt;div class="avatar-name">${contact.name || ''}&lt;/div>
+                        &lt;/div>`).join('')}
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+
+        &lt;div class="card-modal-subtasks-container">
+        &lt;p class="card-modal-subtasks-container-headline">Subtasks:&lt;/p>
+        &lt;div class="card-modal-subtasks">
+            ${(data.content.subtasksData || []).map((subtask, index) => `
+                &lt;div class="card-modal-subtask-maincontainer">
+                    &lt;div class="card-modal-description-checkbox">
+                        &lt;div class="card-modal-subtask-checked"> 
+                            &lt;img src="${subtask.checked ? 'img/checked.svg' : 'img/unchecked.svg'}" 
+                                 class="subtask-checkbox" 
+                                 id="subtaskCheckbox_${data.id}_${index + 1}" 
+                                 onclick="handleCheckboxClick(this)" 
+                                 ${subtask.checked ? 'checked' : ''}>
+                            &lt;img src="img/circle.svg" class="subtask-image" style="display: none;">
+                        &lt;/div>
+                        &lt;div class="card-modal-subtask-description">${subtask.description}&lt;/div>
+                    &lt;/div>
+                    &lt;div class="subtasks-edit-icons-container d-none">
+                        &lt;div class="subtasks-edit-icons-container-p">
+                            &lt;p class="subtask-icon-edit">
+                                &lt;img src="img/edit.svg" alt="Edit Subtask">
+                            &lt;/p>
+                            &lt;p class="subtask-icon-delete">
+                                &lt;img src="img/delete.svg" alt="Delete Subtask">
+                            &lt;/p>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>`).join('')}
+        &lt;/div>
+    &lt;/div>
+
+        &lt;div class="card-modal-edit-and-delete-container">
+            &lt;button onclick="deleteTask()" data-id="${data.id}" class="card-modal-delete-button">
+            &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">&lt;g id="delete">&lt;mask id="mask0_130935_4270" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">&lt;rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>&lt;/mask>&lt;g mask="url(#mask0_130935_4270)">&lt;path id="delete_2" d="M7 21C6.45 21 5.97917 20.8042 5.5875 20.4125C5.19583 20.0208 5 19.55 5 19V6C4.71667 6 4.47917 5.90417 4.2875 5.7125C4.09583 5.52083 4 5.28333 4 5C4 4.71667 4.09583 4.47917 4.2875 4.2875C4.47917 4.09583 4.71667 4 5 4H9C9 3.71667 9.09583 3.47917 9.2875 3.2875C9.47917 3.09583 9.71667 3 10 3H14C14.2833 3 14.5208 3.09583 14.7125 3.2875C14.9042 3.47917 15 3.71667 15 4H19C19.2833 4 19.5208 4.09583 19.7125 4.2875C19.9042 4.47917 20 4.71667 20 5C20 5.28333 19.9042 5.52083 19.7125 5.7125C19.5208 5.90417 19.2833 6 19 6V19C19 19.55 18.8042 20.0208 18.4125 20.4125C18.0208 20.8042 17.55 21 17 21H7ZM7 6V19H17V6H7ZM9 16C9 16.2833 9.09583 16.5208 9.2875 16.7125C9.47917 16.9042 9.71667 17 10 17C10.2833 17 10.5208 16.9042 10.7125 16.7125C10.9042 16.5208 11 16.2833 11 16V9C11 8.71667 10.9042 8.47917 10.7125 8.2875C10.5208 8.09583 10.2833 8 10 8C9.71667 8 9.47917 8.09583 9.2875 8.2875C9.09583 8.47917 9 8.71667 9 9V16ZM13 16C13 16.2833 13.0958 16.5208 13.2875 16.7125C13.4792 16.9042 13.7167 17 14 17C14.2833 17 14.5208 16.9042 14.7125 16.7125C14.9042 16.5208 15 16.2833 15 16V9C15 8.71667 14.9042 8.47917 14.7125 8.2875C14.5208 8.09583 14.2833 8 14 8C13.7167 8 13.4792 8.09583 13.2875 8.2875C13.0958 8.47917 13 8.71667 13 9V16Z" fill="#2A3647"/>&lt;/g>&lt;/g>&lt;/svg>
+                &lt;p> Delete &lt;/p>
+            &lt;/button>
+
+            &lt;div class="card-modal-devider">
+                &lt;img src="img/Vector 3.svg">
+            &lt;/div>
+
+            &lt;button onclick="edit()" class="card-modal-edit-button">
+            &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">&lt;g id="edit">&lt;mask id="mask0_130935_4276" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">&lt;rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>&lt;/mask>&lt;g mask="url(#mask0_130935_4276)">&lt;path id="edit_2" d="M5 19H6.4L15.025 10.375L13.625 8.975L5 17.6V19ZM19.3 8.925L15.05 4.725L16.45 3.325C16.8333 2.94167 17.3042 2.75 17.8625 2.75C18.4208 2.75 18.8917 2.94167 19.275 3.325L20.675 4.725C21.0583 5.10833 21.2583 5.57083 21.275 6.1125C21.2917 6.65417 21.1083 7.11667 20.725 7.5L19.3 8.925ZM17.85 10.4L7.25 21H3V16.75L13.6 6.15L17.85 10.4Z" fill="#2A3647"/>&lt;/g>&lt;/g>&lt;/svg>
+                &lt;p> Edit &lt;/p>
+            &lt;/button>
+
+            &lt;button onclick="saveEditedTask()" data-id="${data.id}" class="card-modal-save-button hide-button">
+                &lt;p> Ok &lt;/p>
+                &lt;svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">&lt;g id="check">&lt;mask id="mask0_126260_6098" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">&lt;rect id="Bounding box" x="0.248535" width="24" height="24" fill="#D9D9D9"/>&lt;/mask>&lt;g mask="url(#mask0_126260_6098)">&lt;path id="check_2" d="M9.79923 15.15L18.2742 6.675C18.4742 6.475 18.7117 6.375 18.9867 6.375C19.2617 6.375 19.4992 6.475 19.6992 6.675C19.8992 6.875 19.9992 7.1125 19.9992 7.3875C19.9992 7.6625 19.8992 7.9 19.6992 8.1L10.4992 17.3C10.2992 17.5 10.0659 17.6 9.79923 17.6C9.53256 17.6 9.29923 17.5 9.09923 17.3L4.79923 13C4.59923 12.8 4.5034 12.5625 4.51173 12.2875C4.52006 12.0125 4.62423 11.775 4.82423 11.575C5.02423 11.375 5.26173 11.275 5.53673 11.275C5.81173 11.275 6.04923 11.375 6.24923 11.575L9.79923 15.15Z" fill="white"/>&lt;/g>&lt;/g>&lt;/svg>
+            &lt;/button>
+        &lt;/div>
+    &lt;/div>
+    &lt;/div>
+    `;
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:resizeThiseventisusedtohandletheresizeevent.ItchecksiftheviewismobileandcallsthehandleMobileViewfunction.ItalsoupdatestheisMobilevariable.">resizeThis event is used to handle the resize event.It checks if the view is mobile and calls the handleMobileView function.It also updates the isMobile variable.</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addContact">addContact</a></li><li><a href="global.html#addContactsToSelectedContacts">addContactsToSelectedContacts</a></li><li><a href="global.html#addEventListenersToButtons">addEventListenersToButtons</a></li><li><a href="global.html#addPlaceholderText">addPlaceholderText</a></li><li><a href="global.html#addSearch">addSearch</a></li><li><a href="global.html#addSubtask">addSubtask</a></li><li><a href="global.html#addSubtaskOpenCard">addSubtaskOpenCard</a></li><li><a href="global.html#addTask">addTask</a></li><li><a href="global.html#addTaskModalHTML">addTaskModalHTML</a></li><li><a href="global.html#addToBoard">addToBoard</a></li><li><a href="global.html#addToBoardModal">addToBoardModal</a></li><li><a href="global.html#addUserToArray">addUserToArray</a></li><li><a href="global.html#allowDrop">allowDrop</a></li><li><a href="global.html#animateCardEffect">animateCardEffect</a></li><li><a href="global.html#backButtonHandlerThisfunctionisusedtohandletheclickeventonthebackbuttoninthemobileview.Ithidesthecontacttitleandfloatingcontactcontainerandshowsthecontactscontainer.Italsoremovesthecontact_selectedclassfromthecontactentry.">backButtonHandlerThis function is used to handle the click event on the back button in the mobile view.It hides the contact title and floating contact container and shows the contacts container.It also removes the contact_selected class from the contact entry.</a></li><li><a href="global.html#capitalizeFirstLetter">capitalizeFirstLetter</a></li><li><a href="global.html#checkAndRenderSharedData">checkAndRenderSharedData</a></li><li><a href="global.html#checkEmailExists">checkEmailExists</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#choose">choose</a></li><li><a href="global.html#chooseCardModal">chooseCardModal</a></li><li><a href="global.html#clearFields">clearFields</a></li><li><a href="global.html#clearSelectedContacts">clearSelectedContacts</a></li><li><a href="global.html#closeCategoryDropdown">closeCategoryDropdown</a></li><li><a href="global.html#closeContactModal">closeContactModal</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#closeOpenCard">closeOpenCard</a></li><li><a href="global.html#configureCardEvents">configureCardEvents</a></li><li><a href="global.html#containerCount">containerCount</a></li><li><a href="global.html#countSubtasks">countSubtasks</a></li><li><a href="global.html#createAndAppendIcons">createAndAppendIcons</a></li><li><a href="global.html#createAndConfigureDateInput">createAndConfigureDateInput</a></li><li><a href="global.html#createAvatarDivs">createAvatarDivs</a></li><li><a href="global.html#createCardContentHTML">createCardContentHTML</a></li><li><a href="global.html#createCardElement">createCardElement</a></li><li><a href="global.html#createContactDiv">createContactDiv</a></li><li><a href="global.html#createContactDivEdit">createContactDivEdit</a></li><li><a href="global.html#createContactDropdown">createContactDropdown</a></li><li><a href="global.html#createDateContainer">createDateContainer</a></li><li><a href="global.html#createIcon">createIcon</a></li><li><a href="global.html#createPriorityButton">createPriorityButton</a></li><li><a href="global.html#createPriorityOptionsContainer">createPriorityOptionsContainer</a></li><li><a href="global.html#createSelectedContactDiv">createSelectedContactDiv</a></li><li><a href="global.html#createSelectedContactDivEdit">createSelectedContactDivEdit</a></li><li><a href="global.html#createSubtaskContainer">createSubtaskContainer</a></li><li><a href="global.html#createSubtasksInputContainer">createSubtasksInputContainer</a></li><li><a href="global.html#deactivateInputField">deactivateInputField</a></li><li><a href="global.html#delContact">delContact</a></li><li><a href="global.html#deleteSubtask">deleteSubtask</a></li><li><a href="global.html#deleteSubtaskItem">deleteSubtaskItem</a></li><li><a href="global.html#deleteTask">deleteTask</a></li><li><a href="global.html#demoContacts">demoContacts</a></li><li><a href="global.html#doNotClose">doNotClose</a></li><li><a href="global.html#drop">drop</a></li><li><a href="global.html#edit">edit</a></li><li><a href="global.html#editContact">editContact</a></li><li><a href="global.html#editSubtaskDescription">editSubtaskDescription</a></li><li><a href="global.html#editSubtaskItem">editSubtaskItem</a></li><li><a href="global.html#enableContentEditing">enableContentEditing</a></li><li><a href="global.html#enablePriorityEditing">enablePriorityEditing</a></li><li><a href="global.html#enableSubtasksEditing">enableSubtasksEditing</a></li><li><a href="global.html#endDragging">endDragging</a></li><li><a href="global.html#endEdit">endEdit</a></li><li><a href="global.html#errorCheckboxSignup">errorCheckboxSignup</a></li><li><a href="global.html#floatingContactRender">floatingContactRender</a></li><li><a href="global.html#generateContactHTMLEdit">generateContactHTMLEdit</a></li><li><a href="global.html#generateDemoContacts">generateDemoContacts</a></li><li><a href="global.html#generateDemoTasks">generateDemoTasks</a></li><li><a href="global.html#generateId">generateId</a></li><li><a href="global.html#generateOpenCardHTML">generateOpenCardHTML</a></li><li><a href="global.html#getCardDetails">getCardDetails</a></li><li><a href="global.html#getContacts">getContacts</a></li><li><a href="global.html#getCurrentDateAsString">getCurrentDateAsString</a></li><li><a href="global.html#getFieldValueById">getFieldValueById</a></li><li><a href="global.html#getItem">getItem</a></li><li><a href="global.html#getLocalStorageContacts">getLocalStorageContacts</a></li><li><a href="global.html#getLocalStorageTasks">getLocalStorageTasks</a></li><li><a href="global.html#getPriorityColor">getPriorityColor</a></li><li><a href="global.html#getPriorityIcon">getPriorityIcon</a></li><li><a href="global.html#getSelectedContacts">getSelectedContacts</a></li><li><a href="global.html#getSelectedPriority">getSelectedPriority</a></li><li><a href="global.html#getTaskById">getTaskById</a></li><li><a href="global.html#getTasks">getTasks</a></li><li><a href="global.html#getTasksData">getTasksData</a></li><li><a href="global.html#getUserContacts">getUserContacts</a></li><li><a href="global.html#getUserTasks">getUserTasks</a></li><li><a href="global.html#getValue">getValue</a></li><li><a href="global.html#guestLogin">guestLogin</a></li><li><a href="global.html#handleCheckboxClick">handleCheckboxClick</a></li><li><a href="global.html#handleMobileViewThisfunctionisusedtohandlethemobileviewofthecontactspage.Itaddseventlistenerstothecontactentryandbackbuttoniftheviewismobile.Itremoveseventlistenersfromthecontactentryandbackbuttoniftheviewisnotmobile.">handleMobileViewThis function is used to handle the mobile view of the contacts page.It adds event listeners to the contact entry and back button if the view is mobile.It removes event listeners from the contact entry and back button if the view is not mobile.</a></li><li><a href="global.html#handleNewSubtaskInputClick">handleNewSubtaskInputClick</a></li><li><a href="global.html#hideLogout">hideLogout</a></li><li><a href="global.html#hideMenuOnClickOutside">hideMenuOnClickOutside</a></li><li><a href="global.html#hideSubtaskIcons">hideSubtaskIcons</a></li><li><a href="global.html#highlight">highlight</a></li><li><a href="global.html#highlightCurrentPriority">highlightCurrentPriority</a></li><li><a href="global.html#initBoard">initBoard</a></li><li><a href="global.html#initHead">initHead</a></li><li><a href="global.html#initUser">initUser</a></li><li><a href="global.html#initUserID">initUserID</a></li><li><a href="global.html#initializeContactDropdownEdit">initializeContactDropdownEdit</a></li><li><a href="global.html#initializeContactDropdownOpenCard">initializeContactDropdownOpenCard</a></li><li><a href="global.html#isCategoryDropdownOpen">isCategoryDropdownOpen</a></li><li><a href="global.html#isContactInContainer">isContactInContainer</a></li><li><a href="global.html#isDropdownOpen">isDropdownOpen</a></li><li><a href="global.html#loadContacts">loadContacts</a></li><li><a href="global.html#loadData">loadData</a></li><li><a href="global.html#loadLoginData">loadLoginData</a></li><li><a href="global.html#loadUsers">loadUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#loginError">loginError</a></li><li><a href="global.html#loginHTML">loginHTML</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#mobileClickHandlerThisfunctionisusedtohandletheclickeventonthecontactentryinthemobileview.Ithidesthecontactscontainerandshowsthecontacttitleandfloatingcontactcontainer.Italsoremovesthecontact_selectedclassfromthecontactentry.">mobileClickHandlerThis function is used to handle the click event on the contact entry in the mobile view.It hides the contacts container and shows the contact title and floating contact container.It also removes the contact_selected class from the contact entry.</a></li><li><a href="global.html#openCard">openCard</a></li><li><a href="global.html#openCategoryDropdown">openCategoryDropdown</a></li><li><a href="global.html#openTaskHTML">openTaskHTML</a></li><li><a href="global.html#passwordInequal">passwordInequal</a></li><li><a href="global.html#passwordRedOutline">passwordRedOutline</a></li><li><a href="global.html#prepareCardData">prepareCardData</a></li><li><a href="global.html#preventDragOver">preventDragOver</a></li><li><a href="global.html#rememberMe">rememberMe</a></li><li><a href="global.html#removeCheckboxError">removeCheckboxError</a></li><li><a href="global.html#removeContact">removeContact</a></li><li><a href="global.html#removeEmailError">removeEmailError</a></li><li><a href="global.html#removeHighlight">removeHighlight</a></li><li><a href="global.html#removeLoginError">removeLoginError</a></li><li><a href="global.html#removePasswordError">removePasswordError</a></li><li><a href="global.html#removePlaceholderText">removePlaceholderText</a></li><li><a href="global.html#removeSelectedContactFromContainerEdit">removeSelectedContactFromContainerEdit</a></li><li><a href="global.html#renderCard">renderCard</a></li><li><a href="global.html#renderSection">renderSection</a></li><li><a href="global.html#replaceElementWithInput">replaceElementWithInput</a></li><li><a href="global.html#replaceLockIcon">replaceLockIcon</a></li><li><a href="global.html#replacePriorityElement">replacePriorityElement</a></li><li><a href="global.html#resetCardModalVisibility">resetCardModalVisibility</a></li><li><a href="global.html#resetFormFields">resetFormFields</a></li><li><a href="global.html#resetIconContainer">resetIconContainer</a></li><li><a href="global.html#resetLoginForm">resetLoginForm</a></li><li><a href="global.html#resetSignupForm">resetSignupForm</a></li><li><a href="global.html#rollDice">rollDice</a></li><li><a href="global.html#saveAndDisplaySelectedContacts">saveAndDisplaySelectedContacts</a></li><li><a href="global.html#saveAndDisplaySelectedContactsEdit">saveAndDisplaySelectedContactsEdit</a></li><li><a href="global.html#saveCheckboxStatus">saveCheckboxStatus</a></li><li><a href="global.html#saveContact">saveContact</a></li><li><a href="global.html#saveEditedContact">saveEditedContact</a></li><li><a href="global.html#saveEditedTask">saveEditedTask</a></li><li><a href="global.html#saveSelectedContacts">saveSelectedContacts</a></li><li><a href="global.html#saveToLocalStorage">saveToLocalStorage</a></li><li><a href="global.html#selectContact">selectContact</a></li><li><a href="global.html#selectContactEdit">selectContactEdit</a></li><li><a href="global.html#selectedInitialsArray">selectedInitialsArray</a></li><li><a href="global.html#selectedPriority">selectedPriority</a></li><li><a href="global.html#setButtonStyles">setButtonStyles</a></li><li><a href="global.html#setInitials">setInitials</a></li><li><a href="global.html#setItem">setItem</a></li><li><a href="global.html#setName">setName</a></li><li><a href="global.html#setUserColor">setUserColor</a></li><li><a href="global.html#setUserToTrue">setUserToTrue</a></li><li><a href="global.html#setupDueDateInput">setupDueDateInput</a></li><li><a href="global.html#setupDueDateInputAddTask">setupDueDateInputAddTask</a></li><li><a href="global.html#setupDueDateInputAddTaskModal">setupDueDateInputAddTaskModal</a></li><li><a href="global.html#showCardOverlay">showCardOverlay</a></li><li><a href="global.html#showDropdown">showDropdown</a></li><li><a href="global.html#showDropdownEdit">showDropdownEdit</a></li><li><a href="global.html#showEmailError">showEmailError</a></li><li><a href="global.html#showLogout">showLogout</a></li><li><a href="global.html#showMoreMenu">showMoreMenu</a></li><li><a href="global.html#showRequiredInfo">showRequiredInfo</a></li><li><a href="global.html#showSubtaskIcons">showSubtaskIcons</a></li><li><a href="global.html#shuffleArray">shuffleArray</a></li><li><a href="global.html#signUp">signUp</a></li><li><a href="global.html#signupButton">signupButton</a></li><li><a href="global.html#startDragging">startDragging</a></li><li><a href="global.html#successMsg">successMsg</a></li><li><a href="global.html#successSignUp">successSignUp</a></li><li><a href="global.html#toggleArrowCategory">toggleArrowCategory</a></li><li><a href="global.html#toggleArrowContacts">toggleArrowContacts</a></li><li><a href="global.html#toggleCheckIcon">toggleCheckIcon</a></li><li><a href="global.html#toggleContactSelection">toggleContactSelection</a></li><li><a href="global.html#toggleContactSelectionEdit">toggleContactSelectionEdit</a></li><li><a href="global.html#togglePasswordVisibility">togglePasswordVisibility</a></li><li><a href="global.html#unrememberMe">unrememberMe</a></li><li><a href="global.html#updateButtonsState">updateButtonsState</a></li><li><a href="global.html#updateCardInformation">updateCardInformation</a></li><li><a href="global.html#updateCardProgressAndSubtasks">updateCardProgressAndSubtasks</a></li><li><a href="global.html#updateCheckboxState">updateCheckboxState</a></li><li><a href="global.html#updatePlaceholderText">updatePlaceholderText</a></li><li><a href="global.html#updatePriorityTextAndSymbol">updatePriorityTextAndSymbol</a></li><li><a href="global.html#updateProgressBar">updateProgressBar</a></li><li><a href="global.html#updateSelectedCategory">updateSelectedCategory</a></li><li><a href="global.html#updateSelectedContacts">updateSelectedContacts</a></li><li><a href="global.html#updateSelectedContactsEdit">updateSelectedContactsEdit</a></li><li><a href="global.html#updateSelectedPriorityStyles">updateSelectedPriorityStyles</a></li><li><a href="global.html#updateSubtaskCheckboxes">updateSubtaskCheckboxes</a></li><li><a href="global.html#updateTaskColumn">updateTaskColumn</a></li><li><a href="global.html#userInitials">userInitials</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Mar 06 2024 23:20:19 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

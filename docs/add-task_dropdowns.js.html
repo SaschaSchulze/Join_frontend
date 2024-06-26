@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: add-task_dropdowns.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: add-task_dropdowns.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents an array storing the selected initials for a task.
+ *
+ * @type {string[]}
+ * @description This array holds the selected initials for a task on the 'Add Task' page.
+ * It is used to store the initials of selected contacts for task assignment.
+ * @name selectedInitialsArray
+ * @global
+ */
+let selectedInitialsArray = [];
+
+/**
+ * Represents the state of the contact dropdown.
+ *
+ * @type {boolean}
+ * @description This variable indicates whether the contact dropdown is open or closed on the 'Add Task' page.
+ * It is used to manage the visibility of the contact dropdown for task assignment.
+ * @name isDropdownOpen
+ * @global
+ */
+let isDropdownOpen = false;
+
+/**
+ * Represents the state of the category dropdown.
+ *
+ * @type {boolean}
+ * @description This variable indicates whether the category dropdown is open or closed on the 'Add Task' page.
+ * It is used to manage the visibility of the category dropdown for task assignment.
+ * @name isCategoryDropdownOpen
+ * @global
+ */
+let isCategoryDropdownOpen = false;
+
+/**
+ * Toggles the visibility of a dropdown menu for selecting contacts.
+ * This function is specifically designed for handling the arrow icon toggle
+ * and dropdown display for contact selection.
+ *
+ * @function
+ * @name toggleArrowContacts
+ *
+ * @example
+ * // HTML structure
+ * // &lt;img id="arrow_img_contacts" class="arrow_down" src="./img/arrow_down.svg" onclick="toggleArrowContacts()" alt="" />
+ * // &lt;div id="contactDropdown" class="dropdown-content">&lt;/div>
+ *
+ * // JavaScript usage
+ * toggleArrowContacts();
+ *
+ * @returns {void}
+ */
+function toggleArrowContacts() {
+    let arrowImg = document.getElementById('arrow_img_contacts');
+    let dropdownContent = document.getElementById("contactDropdown");
+
+    arrowImg.classList.toggle('arrow_up');
+    arrowImg.src = arrowImg.classList.contains('arrow_up') ? 'img/arrow_up.svg' : 'img/arrow_down.svg';
+
+    if (arrowImg.classList.contains('arrow_up')) {
+        showDropdown();
+    } else {
+        dropdownContent.style.display = 'none';
+        isDropdownOpen = false;
+    }
+}
+
+/**
+ * This function asynchronously displays a dropdown menu with contacts.
+ * The function first clears the dropdown content, then fetches the contacts using the `getContacts` function.
+ * For each contact, it checks if the contact is selected by comparing its ID with the IDs in the `selectedInitialsArray`.
+ * It then creates a div for the contact using the `createContactDiv` function and appends it to the dropdown content.
+ * Finally, it makes the dropdown content visible by setting its display style to 'block'.
+ *
+ * @returns {Promise&lt;void>} A Promise that resolves when the dropdown has been displayed.
+ */
+async function showDropdown() {
+    let dropdownContent = document.getElementById("contactDropdown");
+    dropdownContent.innerHTML = "";
+
+    let contacts = await getContacts();
+
+    contacts.forEach(contact => {
+        let isSelected = selectedInitialsArray.some(selectedContact => selectedContact.id === contact.id);
+        let contactDiv = createContactDiv(contact, isSelected);
+        dropdownContent.appendChild(contactDiv);
+    });
+
+    dropdownContent.style.display = 'block';
+    isDropdownOpen = true;
+}
+
+/**
+ * Event listener for click events on the document.
+ * If the clicked element has the class 'arrow_down', the dropdown is shown by calling `showDropdown`.
+ *
+ * @param {Event} event - The click event.
+ */
+
+document.addEventListener('click', function (event) {
+    let dropdown = document.getElementById('contactDropdown');
+    let arrowImg = document.getElementById('arrow_img_contacts');
+    let assignedToInput = document.getElementById('assignedTo');
+
+    if (dropdown) {
+        let isArrowClick = event.target.matches('.arrow_down, .arrow_up');
+        let isAssignedToClick = event.target.id === 'assignedTo';
+
+        if ((!isArrowClick &amp;&amp; !isAssignedToClick) || !event.target.closest('.assigned-to-container')) {
+            dropdown.style.display = 'none';
+            isDropdownOpen = false;
+            arrowImg?.setAttribute('src', 'img/arrow_down.svg')?.classList.remove('arrow_up');
+        }
+
+        if (isAssignedToClick || (assignedToInput &amp;&amp; event.target === assignedToInput)) {
+            showDropdown();
+            arrowImg?.setAttribute('src', 'img/arrow_up.svg')?.classList.add('arrow_up');
+        }
+    }
+});
+/**
+ * This function initializes the contact dropdown by adding an event listener to the document.
+ * @param {*} contact - The contact to be added to the selected contacts.
+ * @param {*} isSelected - A boolean indicating whether the contact is selected.
+ * @returns {HTMLDivElement} A div element representing the contact.
+ */
+function createContactDiv(contact, isSelected) {
+    let contactDiv = document.createElement("div");
+    contactDiv.innerHTML = `
+    &lt;label class="contacts ${isSelected ? 'checked' : ''}" onclick="toggleContactSelection(this, '${contact.id}')">
+        &lt;div class="avatar">
+            &lt;img src="img/Ellipse5-${contact.avatarid}.svg" alt="${contact.name}">
+            &lt;div class="avatar_initletter">${contact.name.split(' ').map(n => n[0]).join('')}&lt;/div>
+        &lt;/div>
+        &lt;div class="contact-dropdown">
+            &lt;div>${contact.name}&lt;/div>
+        &lt;/div>
+        &lt;div class="custom-checkbox" data-contact-id="${contact.id}">&lt;/div>
+        &lt;img class="checkbox-img" src="${isSelected ? 'img/checked_white.svg' : 'img/unchecked.svg'}" alt="Checkbox">
+    &lt;/label>
+    `;
+    contactDiv.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        updateSelectedContacts(contact, isSelected ? 'remove' : 'add');
+        let checkboxImg = contactDiv.querySelector('.checkbox-img');
+        isSelected = !isSelected;
+        checkboxImg.src = isSelected ? 'img/checked_white.svg' : 'img/unchecked.svg';
+    });
+    return contactDiv;
+}
+
+/**
+ * Toggles the selection state of a contact element.
+ *
+ * @param {HTMLElement} element - The HTML element representing the contact.
+ * @param {string} contactId - The unique identifier of the contact.
+ */
+function toggleContactSelection(element, contactId) {
+    let isSelected = element.classList.toggle('checked');
+
+    let checkboxImg = element.querySelector('.checkbox-img');
+    if (checkboxImg) {
+        checkboxImg.src = isSelected ? 'img/checked_white.svg' : 'img/unchecked.svg';
+    }
+
+    updateSelectedContacts({ id: contactId }, isSelected ? 'add' : 'remove');
+}
+
+/**
+ * This function updates the array of selected contacts based on the provided contact and action.
+ * If the action is 'add' and the contact is not already in the array, it adds the contact to the array.
+ * If the action is 'remove' and the contact is in the array, it removes the contact from the array.
+ * After updating the array, it saves and displays the selected contacts using the `saveAndDisplaySelectedContacts` function.
+ *
+ * @param {Object} contact - The contact object.
+ * @param {string} action - The action to perform ('add' or 'remove').
+ */
+function updateSelectedContacts(contact, action) {
+    let index = selectedInitialsArray.findIndex(c => c.id === contact.id);
+
+    if (action === 'add' &amp;&amp; index === -1) {
+        selectedInitialsArray.push(contact);
+    } else if (action === 'remove' &amp;&amp; index !== -1) {
+        selectedInitialsArray.splice(index, 1);
+    }
+
+    saveAndDisplaySelectedContacts();
+}
+
+/**
+ * This function saves and displays the selected contacts.
+ * It first saves the selected contacts using the `saveSelectedContacts` function.
+ * Then it displays the selected contacts using the `selectContact` function.
+ */
+function saveAndDisplaySelectedContacts() {
+    saveSelectedContacts();
+    selectContact();
+}
+
+/**
+ * Creates a div element for a selected contact.
+ * The div includes the contact's avatar, name, and a delete button.
+ *
+ * @param {Object} contact - The contact to create a div for.
+ * @param {string} contact.avatarid - The ID of the contact's avatar.
+ * @param {string} contact.id - The ID of the contact.
+ * @param {string} contact.name - The name of the contact.
+ * @returns {HTMLDivElement} The created div element for the selected contact.
+ */
+function createSelectedContactDiv(contact) {
+    let selectedContactDiv = document.createElement("div");
+    selectedContactDiv.innerHTML = `
+        &lt;div class="selected-contact" data-avatarid="${contact.avatarid}" data-id="${contact.id}">
+            &lt;div class="avatar">
+                &lt;img id="${contact.id}" src="img/Ellipse5-${contact.avatarid}.svg" alt="${contact.name}">
+                &lt;div class="avatar_initletter">${contact.name.split(' ').map(n => n[0]).join('')}&lt;/div>
+            &lt;/div>
+            &lt;div class="contact-delete-container">
+                &lt;div>
+                    &lt;span>${contact.name}&lt;/span>
+                &lt;/div>
+                &lt;span class="remove-contact" onclick="removeContact(${contact.avatarid})">
+                    &lt;img src="img/delete.svg">
+                &lt;/span>
+            &lt;/div>
+        &lt;/div>
+    `;
+    return selectedContactDiv;
+}
+
+/**
+ * Selects a contact and appends it to the selected contacts container.
+ * It first clears the container, then for each contact in the `selectedInitialsArray`,
+ * it creates a div for the contact using `createSelectedContactDiv` and appends it to the container.
+ */
+function selectContact() {
+    let selectedContactsContainer = document.getElementById("selectedContactsContainer");
+    selectedContactsContainer.innerHTML = "";
+
+    selectedInitialsArray.forEach(contact => {
+        let selectedContactDiv = createSelectedContactDiv(contact);
+        selectedContactsContainer.appendChild(selectedContactDiv);
+    });
+}
+/**
+ * Removes a contact from the selected contacts array and updates the selected contacts container.
+ * It first finds the index of the contact with the given avatar ID in the `selectedInitialsArray`.
+ * If such a contact is found, it is removed from the array, and the selected contacts container is updated.
+ *
+ * @param {string} contactavatarId - The avatar ID of the contact to remove.
+ */
+function removeContact(contactavatarId) {
+    let index = selectedInitialsArray.findIndex(contact => contact.avatarid === contactavatarId);
+
+    if (index !== -1) {
+        selectedInitialsArray.splice(index, 1);
+        selectContact();
+
+        let selectedContactsContainer = document.getElementById("selectedContactsContainer");
+        let contactToRemove = selectedContactsContainer.querySelector(`[data-avatarid="${contactavatarId}"]`);
+    }
+}
+/**
+ * Toggles the display of the category options.
+ * If the category options are currently displayed, they are hidden, and vice versa.
+ * The function also stops the propagation of the click event to prevent it from closing the options.
+ *
+ * @param {Event} event - The click event.
+ */
+function toggleArrowCategory() {
+    let categoryArrowImg = document.getElementById('arrow_img_category');
+    let categoryDropdown = document.getElementById('categoryOptions');
+
+    categoryArrowImg.classList.toggle('arrow_up');
+    categoryArrowImg.src = `img/arrow_${categoryArrowImg.classList.contains('arrow_up') ? 'up' : 'down'}.svg`;
+
+    if (categoryDropdown) {
+        categoryDropdown.style.display = categoryArrowImg.classList.contains('arrow_up') ? 'block' : 'none';
+        isCategoryDropdownOpen = categoryArrowImg.classList.contains('arrow_up');
+    }
+}
+
+/**
+ * Handles the click event on the document. If the clicked element is the category input or its container,
+ * it opens the category dropdown. If the clicked element is outside the category dropdown or its related elements,
+ * it closes the category dropdown.
+ *
+ * @param {Event} event - The click event.
+ */
+document.addEventListener('click', function (event) {
+    let categoryArrowImg = document.querySelector('.arrow_down_category');
+    let categoryInput = document.getElementById('category');
+    let categoryDropdown = document.getElementById('categoryOptions');
+
+    if (categoryInput &amp;&amp; (event.target === categoryInput || event.target.closest('.input-container') === categoryInput)) {
+        openCategoryDropdown();
+    }
+
+    if (categoryDropdown &amp;&amp; !event.target.matches('.arrow_down_category, .arrow_up') &amp;&amp; !event.target.closest('.category-container')) {
+        closeCategoryDropdown(categoryArrowImg);
+    }
+});
+
+/**
+ * Opens the category dropdown by adding the 'arrow_up' class to the category arrow image,
+ * changing its source, displaying the category options, and updating the dropdown status.
+ */
+function openCategoryDropdown() {
+    let categoryArrowImg = document.getElementById('arrow_img_category');
+    categoryArrowImg.classList.add('arrow_up');
+    categoryArrowImg.src = 'img/arrow_up.svg';
+
+    let categoryDropdown = document.getElementById('categoryOptions');
+    if (categoryDropdown) {
+        categoryDropdown.style.display = 'block';
+        isCategoryDropdownOpen = true;
+    }
+}
+
+/**
+ * Closes the category dropdown by hiding it, updating the dropdown status,
+ * and resetting the category arrow image to its default state.
+ *
+ * @param {HTMLElement} categoryArrowImg - The category arrow image element.
+ */
+function closeCategoryDropdown(categoryArrowImg) {
+    let categoryDropdown = document.getElementById('categoryOptions');
+    if (categoryDropdown) {
+        categoryDropdown.style.display = 'none';
+        isCategoryDropdownOpen = false;
+
+        if (categoryArrowImg) {
+            categoryArrowImg.src = 'img/arrow_down.svg';
+            categoryArrowImg.classList.remove('arrow_up');
+        }
+    }
+}
+
+/**
+ * Updates the selected category in the category dropdown.
+ * If the selected category is not the same as the given category, the selected category is updated to the given category.
+ * Otherwise, the selected category is cleared.
+ * The category options are also hidden.
+ *
+ * @param {string} category - The category to select.
+ */
+function updateSelectedCategory(category) {
+    let selectedCategoryInput = document.querySelector(".category-dropdown");
+    let categoryOptions = document.getElementById("categoryOptions");
+
+    if (selectedCategoryInput &amp;&amp; categoryOptions) {
+        selectedCategoryInput.value = selectedCategoryInput.value !== category ? category : "";
+
+        categoryOptions.style.display = "none";
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Events</h3><ul><li><a href="global.html#event:resizeThiseventisusedtohandletheresizeevent.ItchecksiftheviewismobileandcallsthehandleMobileViewfunction.ItalsoupdatestheisMobilevariable.">resizeThis event is used to handle the resize event.It checks if the view is mobile and calls the handleMobileView function.It also updates the isMobile variable.</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addContact">addContact</a></li><li><a href="global.html#addContactsToSelectedContacts">addContactsToSelectedContacts</a></li><li><a href="global.html#addEventListenersToButtons">addEventListenersToButtons</a></li><li><a href="global.html#addPlaceholderText">addPlaceholderText</a></li><li><a href="global.html#addSearch">addSearch</a></li><li><a href="global.html#addSubtask">addSubtask</a></li><li><a href="global.html#addSubtaskOpenCard">addSubtaskOpenCard</a></li><li><a href="global.html#addTask">addTask</a></li><li><a href="global.html#addTaskModalHTML">addTaskModalHTML</a></li><li><a href="global.html#addToBoard">addToBoard</a></li><li><a href="global.html#addToBoardModal">addToBoardModal</a></li><li><a href="global.html#addUserToArray">addUserToArray</a></li><li><a href="global.html#allowDrop">allowDrop</a></li><li><a href="global.html#animateCardEffect">animateCardEffect</a></li><li><a href="global.html#backButtonHandlerThisfunctionisusedtohandletheclickeventonthebackbuttoninthemobileview.Ithidesthecontacttitleandfloatingcontactcontainerandshowsthecontactscontainer.Italsoremovesthecontact_selectedclassfromthecontactentry.">backButtonHandlerThis function is used to handle the click event on the back button in the mobile view.It hides the contact title and floating contact container and shows the contacts container.It also removes the contact_selected class from the contact entry.</a></li><li><a href="global.html#capitalizeFirstLetter">capitalizeFirstLetter</a></li><li><a href="global.html#checkAndRenderSharedData">checkAndRenderSharedData</a></li><li><a href="global.html#checkEmailExists">checkEmailExists</a></li><li><a href="global.html#checkPassword">checkPassword</a></li><li><a href="global.html#choose">choose</a></li><li><a href="global.html#chooseCardModal">chooseCardModal</a></li><li><a href="global.html#clearFields">clearFields</a></li><li><a href="global.html#clearSelectedContacts">clearSelectedContacts</a></li><li><a href="global.html#closeCategoryDropdown">closeCategoryDropdown</a></li><li><a href="global.html#closeContactModal">closeContactModal</a></li><li><a href="global.html#closeModal">closeModal</a></li><li><a href="global.html#closeOpenCard">closeOpenCard</a></li><li><a href="global.html#configureCardEvents">configureCardEvents</a></li><li><a href="global.html#containerCount">containerCount</a></li><li><a href="global.html#countSubtasks">countSubtasks</a></li><li><a href="global.html#createAndAppendIcons">createAndAppendIcons</a></li><li><a href="global.html#createAndConfigureDateInput">createAndConfigureDateInput</a></li><li><a href="global.html#createAvatarDivs">createAvatarDivs</a></li><li><a href="global.html#createCardContentHTML">createCardContentHTML</a></li><li><a href="global.html#createCardElement">createCardElement</a></li><li><a href="global.html#createContactDiv">createContactDiv</a></li><li><a href="global.html#createContactDivEdit">createContactDivEdit</a></li><li><a href="global.html#createContactDropdown">createContactDropdown</a></li><li><a href="global.html#createDateContainer">createDateContainer</a></li><li><a href="global.html#createIcon">createIcon</a></li><li><a href="global.html#createPriorityButton">createPriorityButton</a></li><li><a href="global.html#createPriorityOptionsContainer">createPriorityOptionsContainer</a></li><li><a href="global.html#createSelectedContactDiv">createSelectedContactDiv</a></li><li><a href="global.html#createSelectedContactDivEdit">createSelectedContactDivEdit</a></li><li><a href="global.html#createSubtaskContainer">createSubtaskContainer</a></li><li><a href="global.html#createSubtasksInputContainer">createSubtasksInputContainer</a></li><li><a href="global.html#deactivateInputField">deactivateInputField</a></li><li><a href="global.html#delContact">delContact</a></li><li><a href="global.html#deleteSubtask">deleteSubtask</a></li><li><a href="global.html#deleteSubtaskItem">deleteSubtaskItem</a></li><li><a href="global.html#deleteTask">deleteTask</a></li><li><a href="global.html#demoContacts">demoContacts</a></li><li><a href="global.html#doNotClose">doNotClose</a></li><li><a href="global.html#drop">drop</a></li><li><a href="global.html#edit">edit</a></li><li><a href="global.html#editContact">editContact</a></li><li><a href="global.html#editSubtaskDescription">editSubtaskDescription</a></li><li><a href="global.html#editSubtaskItem">editSubtaskItem</a></li><li><a href="global.html#enableContentEditing">enableContentEditing</a></li><li><a href="global.html#enablePriorityEditing">enablePriorityEditing</a></li><li><a href="global.html#enableSubtasksEditing">enableSubtasksEditing</a></li><li><a href="global.html#endDragging">endDragging</a></li><li><a href="global.html#endEdit">endEdit</a></li><li><a href="global.html#errorCheckboxSignup">errorCheckboxSignup</a></li><li><a href="global.html#floatingContactRender">floatingContactRender</a></li><li><a href="global.html#generateContactHTMLEdit">generateContactHTMLEdit</a></li><li><a href="global.html#generateDemoContacts">generateDemoContacts</a></li><li><a href="global.html#generateDemoTasks">generateDemoTasks</a></li><li><a href="global.html#generateId">generateId</a></li><li><a href="global.html#generateOpenCardHTML">generateOpenCardHTML</a></li><li><a href="global.html#getCardDetails">getCardDetails</a></li><li><a href="global.html#getContacts">getContacts</a></li><li><a href="global.html#getCurrentDateAsString">getCurrentDateAsString</a></li><li><a href="global.html#getFieldValueById">getFieldValueById</a></li><li><a href="global.html#getItem">getItem</a></li><li><a href="global.html#getLocalStorageContacts">getLocalStorageContacts</a></li><li><a href="global.html#getLocalStorageTasks">getLocalStorageTasks</a></li><li><a href="global.html#getPriorityColor">getPriorityColor</a></li><li><a href="global.html#getPriorityIcon">getPriorityIcon</a></li><li><a href="global.html#getSelectedContacts">getSelectedContacts</a></li><li><a href="global.html#getSelectedPriority">getSelectedPriority</a></li><li><a href="global.html#getTaskById">getTaskById</a></li><li><a href="global.html#getTasks">getTasks</a></li><li><a href="global.html#getTasksData">getTasksData</a></li><li><a href="global.html#getUserContacts">getUserContacts</a></li><li><a href="global.html#getUserTasks">getUserTasks</a></li><li><a href="global.html#getValue">getValue</a></li><li><a href="global.html#guestLogin">guestLogin</a></li><li><a href="global.html#handleCheckboxClick">handleCheckboxClick</a></li><li><a href="global.html#handleMobileViewThisfunctionisusedtohandlethemobileviewofthecontactspage.Itaddseventlistenerstothecontactentryandbackbuttoniftheviewismobile.Itremoveseventlistenersfromthecontactentryandbackbuttoniftheviewisnotmobile.">handleMobileViewThis function is used to handle the mobile view of the contacts page.It adds event listeners to the contact entry and back button if the view is mobile.It removes event listeners from the contact entry and back button if the view is not mobile.</a></li><li><a href="global.html#handleNewSubtaskInputClick">handleNewSubtaskInputClick</a></li><li><a href="global.html#hideLogout">hideLogout</a></li><li><a href="global.html#hideMenuOnClickOutside">hideMenuOnClickOutside</a></li><li><a href="global.html#hideSubtaskIcons">hideSubtaskIcons</a></li><li><a href="global.html#highlight">highlight</a></li><li><a href="global.html#highlightCurrentPriority">highlightCurrentPriority</a></li><li><a href="global.html#initBoard">initBoard</a></li><li><a href="global.html#initHead">initHead</a></li><li><a href="global.html#initUser">initUser</a></li><li><a href="global.html#initUserID">initUserID</a></li><li><a href="global.html#initializeContactDropdownEdit">initializeContactDropdownEdit</a></li><li><a href="global.html#initializeContactDropdownOpenCard">initializeContactDropdownOpenCard</a></li><li><a href="global.html#isCategoryDropdownOpen">isCategoryDropdownOpen</a></li><li><a href="global.html#isContactInContainer">isContactInContainer</a></li><li><a href="global.html#isDropdownOpen">isDropdownOpen</a></li><li><a href="global.html#loadContacts">loadContacts</a></li><li><a href="global.html#loadData">loadData</a></li><li><a href="global.html#loadLoginData">loadLoginData</a></li><li><a href="global.html#loadUsers">loadUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#loginError">loginError</a></li><li><a href="global.html#loginHTML">loginHTML</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#mobileClickHandlerThisfunctionisusedtohandletheclickeventonthecontactentryinthemobileview.Ithidesthecontactscontainerandshowsthecontacttitleandfloatingcontactcontainer.Italsoremovesthecontact_selectedclassfromthecontactentry.">mobileClickHandlerThis function is used to handle the click event on the contact entry in the mobile view.It hides the contacts container and shows the contact title and floating contact container.It also removes the contact_selected class from the contact entry.</a></li><li><a href="global.html#openCard">openCard</a></li><li><a href="global.html#openCategoryDropdown">openCategoryDropdown</a></li><li><a href="global.html#openTaskHTML">openTaskHTML</a></li><li><a href="global.html#passwordInequal">passwordInequal</a></li><li><a href="global.html#passwordRedOutline">passwordRedOutline</a></li><li><a href="global.html#prepareCardData">prepareCardData</a></li><li><a href="global.html#preventDragOver">preventDragOver</a></li><li><a href="global.html#rememberMe">rememberMe</a></li><li><a href="global.html#removeCheckboxError">removeCheckboxError</a></li><li><a href="global.html#removeContact">removeContact</a></li><li><a href="global.html#removeEmailError">removeEmailError</a></li><li><a href="global.html#removeHighlight">removeHighlight</a></li><li><a href="global.html#removeLoginError">removeLoginError</a></li><li><a href="global.html#removePasswordError">removePasswordError</a></li><li><a href="global.html#removePlaceholderText">removePlaceholderText</a></li><li><a href="global.html#removeSelectedContactFromContainerEdit">removeSelectedContactFromContainerEdit</a></li><li><a href="global.html#renderCard">renderCard</a></li><li><a href="global.html#renderSection">renderSection</a></li><li><a href="global.html#replaceElementWithInput">replaceElementWithInput</a></li><li><a href="global.html#replaceLockIcon">replaceLockIcon</a></li><li><a href="global.html#replacePriorityElement">replacePriorityElement</a></li><li><a href="global.html#resetCardModalVisibility">resetCardModalVisibility</a></li><li><a href="global.html#resetFormFields">resetFormFields</a></li><li><a href="global.html#resetIconContainer">resetIconContainer</a></li><li><a href="global.html#resetLoginForm">resetLoginForm</a></li><li><a href="global.html#resetSignupForm">resetSignupForm</a></li><li><a href="global.html#rollDice">rollDice</a></li><li><a href="global.html#saveAndDisplaySelectedContacts">saveAndDisplaySelectedContacts</a></li><li><a href="global.html#saveAndDisplaySelectedContactsEdit">saveAndDisplaySelectedContactsEdit</a></li><li><a href="global.html#saveCheckboxStatus">saveCheckboxStatus</a></li><li><a href="global.html#saveContact">saveContact</a></li><li><a href="global.html#saveEditedContact">saveEditedContact</a></li><li><a href="global.html#saveEditedTask">saveEditedTask</a></li><li><a href="global.html#saveSelectedContacts">saveSelectedContacts</a></li><li><a href="global.html#saveToLocalStorage">saveToLocalStorage</a></li><li><a href="global.html#selectContact">selectContact</a></li><li><a href="global.html#selectContactEdit">selectContactEdit</a></li><li><a href="global.html#selectedInitialsArray">selectedInitialsArray</a></li><li><a href="global.html#selectedPriority">selectedPriority</a></li><li><a href="global.html#setButtonStyles">setButtonStyles</a></li><li><a href="global.html#setInitials">setInitials</a></li><li><a href="global.html#setItem">setItem</a></li><li><a href="global.html#setName">setName</a></li><li><a href="global.html#setUserColor">setUserColor</a></li><li><a href="global.html#setUserToTrue">setUserToTrue</a></li><li><a href="global.html#setupDueDateInput">setupDueDateInput</a></li><li><a href="global.html#setupDueDateInputAddTask">setupDueDateInputAddTask</a></li><li><a href="global.html#setupDueDateInputAddTaskModal">setupDueDateInputAddTaskModal</a></li><li><a href="global.html#showCardOverlay">showCardOverlay</a></li><li><a href="global.html#showDropdown">showDropdown</a></li><li><a href="global.html#showDropdownEdit">showDropdownEdit</a></li><li><a href="global.html#showEmailError">showEmailError</a></li><li><a href="global.html#showLogout">showLogout</a></li><li><a href="global.html#showMoreMenu">showMoreMenu</a></li><li><a href="global.html#showRequiredInfo">showRequiredInfo</a></li><li><a href="global.html#showSubtaskIcons">showSubtaskIcons</a></li><li><a href="global.html#shuffleArray">shuffleArray</a></li><li><a href="global.html#signUp">signUp</a></li><li><a href="global.html#signupButton">signupButton</a></li><li><a href="global.html#startDragging">startDragging</a></li><li><a href="global.html#successMsg">successMsg</a></li><li><a href="global.html#successSignUp">successSignUp</a></li><li><a href="global.html#toggleArrowCategory">toggleArrowCategory</a></li><li><a href="global.html#toggleArrowContacts">toggleArrowContacts</a></li><li><a href="global.html#toggleCheckIcon">toggleCheckIcon</a></li><li><a href="global.html#toggleContactSelection">toggleContactSelection</a></li><li><a href="global.html#toggleContactSelectionEdit">toggleContactSelectionEdit</a></li><li><a href="global.html#togglePasswordVisibility">togglePasswordVisibility</a></li><li><a href="global.html#unrememberMe">unrememberMe</a></li><li><a href="global.html#updateButtonsState">updateButtonsState</a></li><li><a href="global.html#updateCardInformation">updateCardInformation</a></li><li><a href="global.html#updateCardProgressAndSubtasks">updateCardProgressAndSubtasks</a></li><li><a href="global.html#updateCheckboxState">updateCheckboxState</a></li><li><a href="global.html#updatePlaceholderText">updatePlaceholderText</a></li><li><a href="global.html#updatePriorityTextAndSymbol">updatePriorityTextAndSymbol</a></li><li><a href="global.html#updateProgressBar">updateProgressBar</a></li><li><a href="global.html#updateSelectedCategory">updateSelectedCategory</a></li><li><a href="global.html#updateSelectedContacts">updateSelectedContacts</a></li><li><a href="global.html#updateSelectedContactsEdit">updateSelectedContactsEdit</a></li><li><a href="global.html#updateSelectedPriorityStyles">updateSelectedPriorityStyles</a></li><li><a href="global.html#updateSubtaskCheckboxes">updateSubtaskCheckboxes</a></li><li><a href="global.html#updateTaskColumn">updateTaskColumn</a></li><li><a href="global.html#userInitials">userInitials</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Mar 06 2024 23:20:19 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

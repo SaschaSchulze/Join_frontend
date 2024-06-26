@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <title>Board</title>
+  <link rel="icon" href="img/join-favicon.png" type="image/x-icon">
+  <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/add_task.css" />
+  <link rel="stylesheet" href="css/contacts.css" />
+  <link href="fonts/inter.css" rel="stylesheet" type="text/css">
+  <link href="fonts/opensans.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onload="initUser(), initHead(), initBoard()">
+  <header id="header"></header>
+  <div id="sideboard"></div>
+  <div class="head">
+    <div class="board-head">Board</div>
+    <button class="add-task-button-mobile" onclick="addTask('todo-column')">
+      <img src="img/add.svg" alt="" />
+    </button>
+    <div class="head-right">
+      <div class="input-container-search">
+        <input class="find-task-search" type="text" placeholder="Search..." id="input-search">
+        <img class="vector" src="img/Vector 3.svg" alt="" />
+        <img class="search-icon" src="img/search.svg" alt="" />
+      </div>
+      <button class="add-task-button hover-color" onclick="addTask('todo-column')">
+        Add task
+        <img src="img/add.svg" alt="" />
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-searchbar">
+    <div class="input-container-mobile">
+      <input class="find-task-search" type="text" placeholder="Search..." id="input-search-mobile">
+      <img class="vector" src="img/Vector 3.svg" alt="" />
+      <img class="search-icon" src="img/search.svg" alt="" />
+    </div>
+  </div>
+  <div class="board">
+    <div class="to-do-section">
+      <div class="instance">
+        <h3>To do</h3>
+        <div onclick="addTask('todo-column')" class="plus-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 10 11" fill="none">
+            <path d="M5 1.5V9.5" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+            <path d="M9 5.57544L1 5.57544" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <div id="todo-column" class="board-column-content" ondrop="drop(event)"
+        ondragover="allowDrop(event); highlight('todo-column')" ondragleave="removeHighlight('todo-column')">
+      </div>
+    </div>
+
+    <div class="in-progress-section">
+      <div class="instance">
+        <h3>In progress</h3>
+        <div onclick="addTask('progress-column')" class="plus-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 10 11" fill="none">
+            <path d="M5 1.5V9.5" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+            <path d="M9 5.57544L1 5.57544" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <div id="progress-column" class="board-column-content" ondrop="drop(event)" ondragover="allowDrop(event);
+        highlight('progress-column')" ondragleave="removeHighlight('progress-column')">
+      </div>
+    </div>
+
+    <div class="await-section">
+      <div class="instance">
+        <h3>Await feedback</h3>
+        <div onclick="addTask('await-column')" class="plus-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 10 11" fill="none">
+            <path d="M5 1.5V9.5" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+            <path d="M9 5.57544L1 5.57544" stroke="#2A3647" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
+      <div id="await-column" class="board-column-content" ondrop="drop(event)"
+        ondragover="allowDrop(event); highlight('await-column')" ondragleave="removeHighlight('await-column')">
+      </div>
+    </div>
+
+    <div class="done-section">
+      <div class="instance">
+        <h3>Done</h3>
+      </div>
+
+      <div id="done-column" class="board-column-content" ondrop="drop(event)"
+        ondragover="allowDrop(event); highlight('done-column')" ondragleave="removeHighlight('done-column')">
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/userManager.js"></script>
+  <script src="js/template_load.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/board_add_task_modal.js"></script>
+  <script src="js/board_template.js"></script>
+  <script src="js/board_openTask.js"></script>
+  <script src="js/board_open_task_edit.js"></script>
+  <script src="js/board_open_task_edit_date.js"></script>
+  <script src="js/board_open_task_dropdowns_html.js"></script>
+  <script src="js/board_open_task_dropdowns.js"></script>
+  <script src="js/add-task.js"></script>
+  <script src="js/add-task_dropdowns.js"></script>
+  <script src="js/add-task_date_prio.js"></script>
+  <script src="js/header.js"></script>
+  <script src="js/drag_drop.js"></script>
+
+  <script src="js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- jQuery UI -->
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+</body>
+
+</html>
