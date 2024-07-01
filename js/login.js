@@ -78,19 +78,46 @@ async function guestLogin() {
  * login after check if email and password exist in the user object of users array otherwise show error
  */
 async function login() {
-    let emailLogin = document.getElementById('email-login');
-    let passwordLogin = document.getElementById('password-login');
+    let emailLogin = document.getElementById('email-login').value;
+    let passwordLogin = document.getElementById('password-login').value;
 
-    let user = users.find(user => user.email === emailLogin.value && user.password === passwordLogin.value);
-    if (user) {
-        await setUserToTrue(user);
-        rememberMe();
+    let csrftoken = getCSRFToken();
+
+    let response = await fetch('http://127.0.0.1:8000/api/login/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            email: emailLogin,
+            password: passwordLogin
+        })
+    });
+
+    if (response.ok) {
+        let data = await response.json();
+        console.log('Login successful, token:', data.token);
+        localStorage.setItem('token', data.token);
         resetLoginForm();
         window.open('summary.html', '_self');
     } else {
+        let errorData = await response.json();
+        console.error('Login failed:', errorData.error);
         loginError();
     }
 }
+
+
+function getCSRFToken() {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(cookie => cookie.startsWith('csrftoken='))
+        .split('=')[1];
+    return cookieValue;
+}
+
+
 
 /**
  * loggedInUser to be set to true while all others users are set to false then update users
@@ -117,34 +144,61 @@ function resetLoginForm() {
  * check all sign up fields for validity and show error messages if invalid
  */
 async function signUp() {
-    let emailSignup = document.getElementById('email-register');
-    let passwordSignup = document.getElementById('password-register');
-    let passwordConfirm = document.getElementById('password-confirm');
+    let nameSignup = document.getElementById('name-register').value;
+    let emailSignup = document.getElementById('email-register').value;
+    let passwordSignup = document.getElementById('password-register').value;
+    let passwordConfirm = document.getElementById('password-confirm').value;
     let checkedIcon = document.getElementById('checked');
 
-    if (checkEmailExists(emailSignup.value)) {
-        showEmailError();
-    } else {
-        removeEmailError();
+    if (passwordSignup !== passwordConfirm) {
+        passwordInequal();
+        return;
     }
 
-    if (!checkEmailExists(emailSignup.value) && passwordSignup.value === passwordConfirm.value && checkedIcon) {
-        await addUserToArray(emailSignup, passwordSignup);
+    if (!checkedIcon) {
+        errorCheckboxSignup();
+        return;
+    }
+
+    let csrftoken = getCookie('csrftoken');
+
+    let response = await fetch('http://127.0.0.1:8000/api/register/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            name: nameSignup,
+            email: emailSignup,
+            password: passwordSignup
+        })
+    });
+
+    if (response.ok) {
+        let data = await response.json();
+        console.log('Registration successful, token:', data.token);
         resetSignupForm();
         successSignUp();
-    } else if (passwordSignup.value !== passwordConfirm.value && !checkedIcon) {
-        passwordInequal();
-        errorCheckboxSignup();
-    } else if (passwordSignup.value !== passwordConfirm.value && checkedIcon) {
-        passwordInequal();
-        removeCheckboxError();
-    } else if (passwordSignup.value === passwordConfirm.value && !checkedIcon) {
-        errorCheckboxSignup();
-        removePasswordError();
-    } else if (passwordSignup.value === passwordConfirm.value && checkedIcon) {
-        removeCheckboxError();
-        removePasswordError();
+    } else {
+        let errorData = await response.json();
+        console.error('Registration failed:', errorData);
     }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
 /**
