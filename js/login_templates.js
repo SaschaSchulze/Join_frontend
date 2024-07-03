@@ -70,52 +70,39 @@ function registerHTML() {
 function loginHTML() {
     return /*html*/ `
         <div class="login-card-container">
-            <div class="login-card">
-                <h1 class="login-heading">Log in</h1>
+        <div class="login-card">
+            <h1 class="login-heading">Log in</h1>
 
-                <form class="login-form" onsubmit="login(); return false">
-
-                    <div class="login-inputs" id="login-inputs">
-
+            <form class="login-form" id="login-form" onsubmit="login(event)">
+                <div class="login-inputs" id="login-inputs">
                     <div class="login-input-container">
                         <div class="login-input-wrapper">
-                            <div class="login-email-input">
-                        <input type="email" name="email-login" id="email-login" placeholder="Email"
-                            required autocomplete="on" />
-                            </div>
-                            <div>
-                        <img class="email-icon" src="img/mail.svg" alt="Email Icon" />
-                            </div>
+                            <input type="email" name="email" id="email-login" placeholder="Email" required autocomplete="on" />
+                            <img class="email-icon" src="img/mail.svg" alt="Email Icon" />
                         </div>
                     </div>
 
                     <div class="login-input-container">
                         <div class="login-input-wrapper" id="pw-wrapper">
-                        <input class="login-pw-input" type="password" name="password" id="password-login"
-                            placeholder="Password" required autocomplete="current-password"
-                            onclick="replaceLockIcon('login')" />
-                        <img class="lock-icon" id="lock-icon-login" src="img/lock.svg" alt="Password Icon" />
+                            <input class="login-pw-input" type="password" name="password" id="password-login" placeholder="Password" required autocomplete="current-password" />
+                            <img class="lock-icon" id="lock-icon-login" src="img/lock.svg" alt="Password Icon" />
                         </div>
                     </div>
-                    </div>
+                </div>
 
-                    <div class="login-remember">
-                    <img class="checkbox-icon" src="img/unchecked.svg" alt="Checkbox" id="unchecked"
-                        onclick="toggleCheckIcon()" />
+                <div class="login-remember">
+                    <img class="checkbox-icon" src="img/unchecked.svg" alt="Checkbox" id="unchecked" onclick="toggleCheckIcon()" />
                     <span class="login-remember-text">Remember Me</span>
-                    </div>
+                </div>
 
-                    <div class="login-button-container">
+                <div class="login-button-container">
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                     <button type="submit" class="main-button">Log in</button>
-                    <button type="button" class="main-button main-button-white" onclick="guestLogin()">
-                        Guest Log in
-                    </button>
-                    </div>
+                    <button type="button" class="main-button main-button-white" onclick="guestLogin()">Guest Log in</button>
+                </div>
+            </form>
 
-                </form>
-
-            </div>
         </div>
+    </div>
     `;
 }

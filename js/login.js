@@ -77,36 +77,35 @@ async function guestLogin() {
 /**
  * login after check if email and password exist in the user object of users array otherwise show error
  */
-async function login() {
-    let emailLogin = document.getElementById('email-login').value;
-    let passwordLogin = document.getElementById('password-login').value;
+async function login(event) {
+    event.preventDefault(); // Verhindert das Standardverhalten des Formular-Submit
 
-    let csrftoken = getCSRFToken();
+    let email = document.getElementById('email-login').value;
+    let password = document.getElementById('password-login').value;
+    let csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
-    let response = await fetch('http://127.0.0.1:8000/api/login/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({
-            email: emailLogin,
-            password: passwordLogin
-        })
-    });
+    try {
+        let response = await fetch('http://127.0.0.1:8000/api/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ email: email, password: password })
+        });
 
-    if (response.ok) {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
         let data = await response.json();
-        console.log('Login successful, token:', data.token);
-        localStorage.setItem('token', data.token);
-        resetLoginForm();
-        window.open('summary.html', '_self');
-    } else {
-        let errorData = await response.json();
-        console.error('Login failed:', errorData.error);
-        loginError();
+        console.log('Login successful:', data);
+        // Hier könntest du die weitere Navigation oder Aktionen nach dem Login durchführen
+    } catch (error) {
+        console.error('Fehler beim Login:', error);
     }
 }
+
 
 
 function getCSRFToken() {
