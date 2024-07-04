@@ -38,9 +38,9 @@ async function countTasks() {
  *                  If no tasks are found in local storage, it returns an empty array.
  */
 function getTasks() {
-  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-  if (loggedInUser && loggedInUser.tasks) {
-    return loggedInUser.tasks;
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (currentUser && currentUser.tasks) {
+    return currentUser.tasks;
   } else {
     return JSON.parse(localStorage.getItem('tasks')) || [];
   }
@@ -120,11 +120,10 @@ function formatDate(date) {
 async function initSummary() {
   try {
       // Lade den eingeloggten Benutzer aus dem localStorage
-      let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-      console.log('Logged In User:', loggedInUser);
+      let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      console.log('Logged In User:', currentUser);
 
       // Weitere Initialisierungsschritte der Summary-Seite
-      // await loadUsers();
       await loadData();
       await countTasks();
       renderContent();
@@ -139,7 +138,7 @@ async function initSummary() {
  * @returns {Object|null} The logged in user's data object, or null if no user is logged in.
  */
 function getLoggedInUser() {
-  return JSON.parse(localStorage.getItem('loggedInUser')) || null;
+  return JSON.parse(localStorage.getItem('currentUser')) || null;
 }
 
 
@@ -177,22 +176,33 @@ async function loadData() {
 // }
 
 /**
- * change the greeting text to the current users first & second name or add "Guest" if not logged in
+ * Change the greeting text to the current user's first & last name or add "Guest" if not logged in.
  */
 function greetUser() {
-  if (users.length > 0) {
-    let loggedInUser = users.find(user => user.isYou);
-    if (loggedInUser) {
-      let fullName = loggedInUser.firstName;
-      if (loggedInUser.lastName) {
-        fullName += ` ${loggedInUser.lastName}`;
-      }
-      document.getElementById("loggedinUser").innerHTML = fullName;
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  let isUserLoggedIn = false;
+
+  if (currentUser) {
+    let fullName = currentUser.firstName || '';
+    if (currentUser.lastName) {
+      fullName += ` ${currentUser.lastName}`;
+    }
+    let currentUserElement = document.getElementById("loggedinUser");
+    if (currentUserElement) {
+      currentUserElement.innerHTML = fullName || "Guest";
       isUserLoggedIn = true;
+    } else {
+      console.error("Element with id 'currentUser' not found");
     }
   }
+
   if (!isUserLoggedIn) {
-    document.getElementById("loggedinUser").innerHTML = "Guest";
+    let currentUserElement = document.getElementById("currentUser");
+    if (currentUserElement) {
+      currentUserElement.innerHTML = "Guest";
+    } else {
+      console.error("Element with id 'currentUser' not found");
+    }
   }
 }
 
@@ -233,7 +243,7 @@ function greetingTimed() {
 }
 
 /**
- * summary page only mobile animation play
+ * Summary page only mobile animation play.
  */
 document.addEventListener('DOMContentLoaded', function () {
   // Überprüfen Sie, ob die Fensterbreite weniger als 600px beträgt

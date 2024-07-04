@@ -3,7 +3,7 @@
  * This file is used to handle the header of the application
  */
 
-let loggedInUser;
+// let currentUser;
 
 /**
  * This function initializes and loads user contacts and Initials
@@ -19,12 +19,12 @@ async function initHead() {
  */
 async function loadUsers() {
     try {
-        loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        console.log('Logged In User:', loggedInUser);
+        currentUser = JSON.parse(localStorage.getItem('currentUser'));
     } catch (e) {
         console.error('Loading Users error: ', e);
     }
 }
+
 
 /**
  * Show first letter of username
@@ -32,8 +32,8 @@ async function loadUsers() {
 async function userInitials() {
     let usernameFirstLetter = '';
 
-    if (loggedInUser && loggedInUser.username) {
-        usernameFirstLetter = loggedInUser.username.charAt(0).toUpperCase();
+    if (currentUser && currentUser.username) {
+        usernameFirstLetter = currentUser.username.charAt(0).toUpperCase();
     }
 
     let headerUsernameElement = document.getElementById("header-username");

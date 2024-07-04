@@ -104,11 +104,13 @@ async function login(event) {
         console.log('Login successful:', data);
 
         // Speichern der Benutzerdaten im localStorage für den Zugriff auf der summary.html Seite
-        localStorage.setItem('loggedInUser', JSON.stringify({
+        localStorage.setItem('currentUser', JSON.stringify({
             token: data.token,
             email: data.email,
-            userId: data.userId,
-            username: data.username
+            userId: data.user_id,
+            username: data.username,
+            firstName: data.first_name,
+            lastName: data.last_name
         }));
 
         window.location.href = "/summary.html";
@@ -131,14 +133,14 @@ function getCSRFToken() {
 
 
 /**
- * loggedInUser to be set to true while all others users are set to false then update users
- * @param {object} loggedInUser - stands for the logged in user
+ * currentUser to be set to true while all others users are set to false then update users
+ * @param {object} currentUser - stands for the logged in user
  */
-async function setUserToTrue(loggedInUser) {
+async function setUserToTrue(currentUser) {
     for (let user of users) {
         user.isYou = false;
     }
-    loggedInUser.isYou = true;
+    currentUser.isYou = true;
     await setItem('users', JSON.stringify(users));
 }
 
