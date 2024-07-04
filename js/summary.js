@@ -38,8 +38,12 @@ async function countTasks() {
  *                  If no tasks are found in local storage, it returns an empty array.
  */
 function getTasks() {
-  let isUserLoggedIn = users.some(user => user.isYou);
-  return isUserLoggedIn ? users.find(user => user.isYou).tasks : JSON.parse(localStorage.getItem('tasks')) || [];
+  let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+  if (loggedInUser && loggedInUser.tasks) {
+    return loggedInUser.tasks;
+  } else {
+    return JSON.parse(localStorage.getItem('tasks')) || [];
+  }
 }
 
 /**
@@ -104,41 +108,89 @@ function formatDate(date) {
 /**
  * get data from backend server and render the content
  */
+// async function initSummary() {
+//   await loadData();
+//   await countTasks();
+//   renderContent();
+// }
+
+/**
+ * Initialize the summary page after login.
+ */
 async function initSummary() {
-  await loadData();
-  await countTasks();
-  renderContent();
+  try {
+      // Lade den eingeloggten Benutzer aus dem localStorage
+      let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+      console.log('Logged In User:', loggedInUser);
+
+      // Weitere Initialisierungsschritte der Summary-Seite
+      // await loadUsers();
+      await loadData();
+      await countTasks();
+      renderContent();
+  } catch (error) {
+      console.error('Error initializing summary:', error);
+  }
 }
 
 /**
- * fetch users data from backend server to global variables
+ * Retrieves the logged in user's data from localStorage.
+ *
+ * @returns {Object|null} The logged in user's data object, or null if no user is logged in.
+ */
+function getLoggedInUser() {
+  return JSON.parse(localStorage.getItem('loggedInUser')) || null;
+}
+
+
+/**
+ * Fetch user data from the backend server and store it in the 'users' array.
  */
 async function loadData() {
   try {
-    users = JSON.parse(await getItem('users'));
-  } catch (e) {
-    console.error('Loading Data error:', e);
+    let response = await fetch('http://127.0.0.1:8000/api/login/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+
+    let userData = await response.json();
+    users = userData.users || []; // Annahme: Die Benutzerdaten sind in einem Objekt mit dem Feld "users"
+  } catch (error) {
+    console.error('Loading Data error:', error);
   }
 }
+
+/**
+ * Retrieves the logged in user's data from the users array.
+ *
+ * @returns {Object|null} The logged in user's data object, or null if no user is logged in.
+ */
+// function getLoggedInUser() {
+//   let loggedInUser = users.find(user => user.isYou);
+//   return loggedInUser || null;
+// }
 
 /**
  * change the greeting text to the current users first & second name or add "Guest" if not logged in
  */
-
 function greetUser() {
-  for (let i = 0; i < users.length; i++) {
-    let user = users[i];
-    if (user["isYou"]) {
-      let fullName = user["firstName"];
-      if (user["lastName"]) {
-        fullName += ` ${user["lastName"]}`;
+  if (users.length > 0) {
+    let loggedInUser = users.find(user => user.isYou);
+    if (loggedInUser) {
+      let fullName = loggedInUser.firstName;
+      if (loggedInUser.lastName) {
+        fullName += ` ${loggedInUser.lastName}`;
       }
       document.getElementById("loggedinUser").innerHTML = fullName;
       isUserLoggedIn = true;
-      break;
     }
   }
-
   if (!isUserLoggedIn) {
     document.getElementById("loggedinUser").innerHTML = "Guest";
   }
@@ -147,7 +199,6 @@ function greetUser() {
 /**
  * initialize the greetUser() function
  */
-
 function renderContent() {
   greetUser();
   greetingTimed();

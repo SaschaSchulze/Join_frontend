@@ -41,7 +41,7 @@ function rollDice() {
  * add event listener for dom content loaded event to initialize functions
  */
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadUsers();
+    // await loadUsers();
     loadLoginData();
 })
 
@@ -75,10 +75,12 @@ async function guestLogin() {
 }
 
 /**
- * login after check if email and password exist in the user object of users array otherwise show error
+ * Logs in after checking if email and password exist in the user object of users array, otherwise shows error.
+ *
+ * @param {Event} event - The submit event object from the login form.
  */
 async function login(event) {
-    event.preventDefault(); // Verhindert das Standardverhalten des Formular-Submit
+    event.preventDefault();
 
     let email = document.getElementById('email-login').value;
     let password = document.getElementById('password-login').value;
@@ -100,7 +102,17 @@ async function login(event) {
 
         let data = await response.json();
         console.log('Login successful:', data);
-        // Hier könntest du die weitere Navigation oder Aktionen nach dem Login durchführen
+
+        // Speichern der Benutzerdaten im localStorage für den Zugriff auf der summary.html Seite
+        localStorage.setItem('loggedInUser', JSON.stringify({
+            token: data.token,
+            email: data.email,
+            userId: data.userId,
+            username: data.username
+        }));
+
+        window.location.href = "/summary.html";
+
     } catch (error) {
         console.error('Fehler beim Login:', error);
     }
