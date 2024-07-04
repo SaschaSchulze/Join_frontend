@@ -167,73 +167,110 @@ window.loadContacts = loadContacts;
  * This function loads the contacts from the local storage and displays them on the contacts.html page.
  */
 async function loadContacts() {
-    let contacts;
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let isUserLoggedIn = !!currentUser;
+        let contacts = [];
 
-    if (isUserLoggedIn) {
-        let users = JSON.parse(await getItem('users'));
-        if (users[currentUser]) {
-            contacts = users[currentUser].contacts;
-        } else {
-            console.error('User not found:', currentUser);
-        }
-    } else {
-        contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-    }
+        console.log('Current user:', currentUser);
+        console.log('Is user logged in:', isUserLoggedIn);
 
-    let lastInitial;
+        // Laden der vorhandenen Kontakte aus dem Local Storage
+        let storedContacts = JSON.parse(localStorage.getItem('contacts'));
+        contacts = Array.isArray(storedContacts) ? storedContacts : [];
 
-    function createContactHTML(contact) {
-        let initialLetterHTML = '';
-        let currentInitial = contact.name.charAt(0).toUpperCase();
-        if (currentInitial !== lastInitial) {
-            initialLetterHTML = `<div class="initial_letter">${currentInitial}</div>
-            <div class="line"><svg xmlns="http://www.w3.org/2000/svg" width="354" height="2" viewBox="0 0 354 2" fill="none"><path d="M1 1H353" stroke="#D1D1D1" stroke-linecap="round"/></svg></div>`;
-            lastInitial = currentInitial;
-        }
+        // Wenn eingeloggt, füge den aktuellen Benutzer zu den Kontakten hinzu
+        if (isUserLoggedIn) {
+            let users = JSON.parse(localStorage.getItem('users'));
 
-        if (currentUser !== undefined && users[currentUser] && users[currentUser].firstName) {
-            if (contact.name === users[currentUser].firstName) {
-                contact.name += " (You)";
+            console.log('Loaded users:', users);
+
+            if (users && users[currentUser.username]) {
+                let currentUserContact = {
+                    id: currentUser.userId,
+                    name: `${currentUser.firstName} ${currentUser.lastName}`,
+                    email: currentUser.email,
+                    avatarid: 1 // Hier kann eine entsprechende Avatar-ID für den Benutzer gesetzt werden
+                };
+
+                // Überprüfen, ob der Benutzer bereits in den Kontakten enthalten ist
+                let existingUserIndex = contacts.findIndex(contact => contact.id === currentUserContact.id);
+                if (existingUserIndex === -1) {
+                    contacts.push(currentUserContact);
+                }
+            } else {
+                console.error('User not found in users:', currentUser.username);
             }
         }
 
-        return `
-            ${initialLetterHTML}
-            <div class="contactentry" id=${contact.id}>
-                <div class="avatar">
-                    <img src="img/Ellipse5-${contact.avatarid}.svg"></img>
-                    <div class="avatar_initletter">${contact.name.split(' ').map(n => n[0].toUpperCase()).join('')}</div>
-                </div>
-                <div class="contactentry_info">
-                    <div class="contactentry_name">${contact.name}</div>
-                    <div class="contactentry_email">${contact.email}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    let contactsHTML = '';
-
-    for (let contact of contacts) {
-        contactsHTML += createContactHTML(contact);
-    }
-
-    document.querySelector('.contacts_container').innerHTML += contactsHTML;
-
-    for (let contact of contacts) {
-        let contactElement = document.getElementById(contact.id);
-
-        contactElement.addEventListener('click', function() {
-            let contactEntries = document.querySelectorAll('.contactentry');
-            for (let entry of contactEntries) {
-                entry.classList.remove('contact_selected');
-            }
-
-            contactElement.classList.add('contact_selected');
-            floatingContactRender(contact.id);
+        // Sortiere die Kontakte alphabetisch nach dem Namen
+        contacts.sort((a, b) => {
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return 0;
         });
+
+        console.log('Sorted contacts:', contacts);
+
+        let lastInitial;
+
+        function createContactHTML(contact) {
+            let initialLetterHTML = '';
+            let currentInitial = contact.name.charAt(0).toUpperCase();
+            if (currentInitial !== lastInitial) {
+                initialLetterHTML = `<div class="initial_letter">${currentInitial}</div>
+                <div class="line"><svg xmlns="http://www.w3.org/2000/svg" width="354" height="2" viewBox="0 0 354 2" fill="none"><path d="M1 1H353" stroke="#D1D1D1" stroke-linecap="round"/></svg></div>`;
+                lastInitial = currentInitial;
+            }
+
+            if (currentUser && users && users[currentUser.username] && users[currentUser.username].firstName) {
+                if (contact.name === users[currentUser.username].firstName) {
+                    contact.name += " (You)";
+                }
+            }
+
+            return `
+                ${initialLetterHTML}
+                <div class="contactentry" id="${contact.id}">
+                    <div class="avatar">
+                        <img src="img/Ellipse5-${contact.avatarid}.svg"></img>
+                        <div class="avatar_initletter">${contact.name.split(' ').map(n => n[0].toUpperCase()).join('')}</div>
+                    </div>
+                    <div class="contactentry_info">
+                        <div class="contactentry_name">${contact.name}</div>
+                        <div class="contactentry_email">${contact.email}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let contactsHTML = '';
+
+        for (let contact of contacts) {
+            contactsHTML += createContactHTML(contact);
+        }
+
+        document.querySelector('.contacts_container').innerHTML = contactsHTML;
+
+        // Add event listeners after rendering contacts
+        for (let contact of contacts) {
+            let contactElement = document.getElementById(contact.id);
+
+            contactElement.addEventListener('click', function() {
+                let contactEntries = document.querySelectorAll('.contactentry');
+                for (let entry of contactEntries) {
+                    entry.classList.remove('contact_selected');
+                }
+
+                contactElement.classList.add('contact_selected');
+                floatingContactRender(contact.id);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading contacts:', error);
     }
 }
+
 
 window.editContact = editContact;
 
