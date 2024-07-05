@@ -249,6 +249,7 @@ async function loadContacts() {
         for (let contact of contacts) {
             contactsHTML += createContactHTML(contact);
         }
+        
 
         document.querySelector('.contacts_container').innerHTML = contactsHTML;
 
@@ -263,6 +264,7 @@ async function loadContacts() {
                 }
 
                 contactElement.classList.add('contact_selected');
+                console.log('Sorted contacts:', contacts);
                 floatingContactRender(contact.id);
             });
         }
@@ -526,29 +528,58 @@ function clearFloatingContact() {
  * This function renders the floating contact window with the contact information.
  * @param {*} contactid
  */
-async function floatingContactRender(contactid){
-    let contacts;
+async function floatingContactRender(contactid) {
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let isUserLoggedIn = !!currentUser;
+        let users;
 
-    if (isUserLoggedIn) {
-        let users = JSON.parse(await getItem('users'));
-        if (users[currentUser]) {
-            contacts = users[currentUser].contacts;
-        } else {
-            console.error('User not found:', currentUser);
+        console.log('Current user:', currentUser);
+        console.log('Is user logged in:', isUserLoggedIn);
+
+        let contacts = [];
+
+        // Load contacts from localStorage
+        let storedContacts = JSON.parse(localStorage.getItem('contacts'));
+        if (Array.isArray(storedContacts)) {
+            contacts = storedContacts;
         }
-    } else {
-        contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-    }
 
-    let contact = contacts.find(contact => contact.id === contactid);
+        if (isUserLoggedIn) {
+            users = JSON.parse(localStorage.getItem('users'));
 
-    if (contact) {
-        if (currentUser !== undefined && users[currentUser] && users[currentUser].firstName) {
-            if (contact.name === users[currentUser].firstName) {
-                contact.name += " (You)";
+            console.log('Loaded users:', users);
+
+            if (!users || !users[currentUser.username]) {
+                console.error('User not found:', currentUser);
+                return;
+            }
+
+            // Add currentUser to contacts if not already present
+            let currentUserContact = {
+                id: currentUser.userId,
+                name: `${currentUser.firstName} ${currentUser.lastName}`,
+                email: currentUser.email,
+                avatarid: 1 // Adjust the avatar ID accordingly
+            };
+
+            let existingUserIndex = contacts.findIndex(contact => contact.id === currentUserContact.id);
+            if (existingUserIndex === -1) {
+                contacts.push(currentUserContact);
             }
         }
 
+        let contact = contacts.find(contact => contact.id === contactid);
+
+        if (contact) {
+            // Modify contact name if currentUser matches contact
+            if (currentUser && users && users[currentUser.username] && users[currentUser.username].firstName) {
+                if (contact.name === users[currentUser.username].firstName) {
+                    contact.name += " (You)";
+                }
+            }
+
+            console.log('Sorted contacts:', contacts);
         let floating_contactHTML = `
         <div class="floating_contact">
             <div class="floating_contact_avatar">
@@ -601,15 +632,18 @@ async function floatingContactRender(contactid){
 
         let floating_contactElement = document.getElementById("floating_contact");
 
-        while (floating_contactElement.firstChild) {
-            floating_contactElement.removeChild(floating_contactElement.firstChild);
-        }
+            while (floating_contactElement.firstChild) {
+                floating_contactElement.removeChild(floating_contactElement.firstChild);
+            }
 
-        let floating_contactDiv = document.createElement("div");
-        floating_contactDiv.innerHTML = floating_contactHTML;
-        floating_contactElement.appendChild(floating_contactDiv);
-    } else {
-        console.log(`No contact found with ID ${contactid}.`);
+            let floating_contactDiv = document.createElement("div");
+            floating_contactDiv.innerHTML = floating_contactHTML;
+            floating_contactElement.appendChild(floating_contactDiv);
+        } else {
+            console.log(`No contact found with ID ${contactid}.`);
+        }
+    } catch (error) {
+        console.error('Error rendering floating contact:', error);
     }
 } 
 
