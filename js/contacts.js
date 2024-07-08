@@ -21,11 +21,11 @@ function addContact() {
     overlay = document.createElement("div");
     overlay.id = "overlay";
     document.body.appendChild(overlay);
-    
+
     contactModal = document.createElement("div");
     contactModal.id = "contactModal";
     document.body.appendChild(contactModal);
-    
+
     let formDiv = document.createElement("div");
     contactModal.innerHTML += addcontact_innerHTML;
     contactModal.appendChild(formDiv);
@@ -199,7 +199,33 @@ async function loadContacts() {
                     contacts.push(currentUserContact);
                 }
             } else {
-                console.error('User not found in users:', currentUser.username);
+                // Füge den aktuellen Benutzer zu users hinzu, wenn er nicht vorhanden ist
+                if (!users) {
+                    users = {};
+                }
+                users[currentUser.username] = {
+                    userId: currentUser.userId,
+                    email: currentUser.email,
+                    username: currentUser.username,
+                    firstName: currentUser.firstName,
+                    lastName: currentUser.lastName
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+
+                console.log('Added current user to users:', users);
+
+                // Füge den aktuellen Benutzer zu den Kontakten hinzu
+                let currentUserContact = {
+                    id: currentUser.userId,
+                    name: `${currentUser.firstName} ${currentUser.lastName}`,
+                    email: currentUser.email,
+                    avatarid: 1 // Hier kann eine entsprechende Avatar-ID für den Benutzer gesetzt werden
+                };
+
+                let existingUserIndex = contacts.findIndex(contact => contact.id === currentUserContact.id);
+                if (existingUserIndex === -1) {
+                    contacts.push(currentUserContact);
+                }
             }
         }
 
@@ -249,7 +275,6 @@ async function loadContacts() {
         for (let contact of contacts) {
             contactsHTML += createContactHTML(contact);
         }
-        
 
         document.querySelector('.contacts_container').innerHTML = contactsHTML;
 
@@ -257,7 +282,7 @@ async function loadContacts() {
         for (let contact of contacts) {
             let contactElement = document.getElementById(contact.id);
 
-            contactElement.addEventListener('click', function() {
+            contactElement.addEventListener('click', function () {
                 let contactEntries = document.querySelectorAll('.contactentry');
                 for (let entry of contactEntries) {
                     entry.classList.remove('contact_selected');
@@ -274,6 +299,7 @@ async function loadContacts() {
 }
 
 
+
 window.editContact = editContact;
 
 /**
@@ -281,85 +307,92 @@ window.editContact = editContact;
  * It creates a modal window with a form to edit a contact.
  * @param {*} contactid
  */
-async function editContact(contactid){
-    let contacts;
+async function editContact(contactid) {
+    try {
+        // Check if the user is logged in
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let isUserLoggedIn = !!currentUser;
 
-    if (isUserLoggedIn) {
-        let users = JSON.parse(await getItem('users'));
-        if (users[currentUser]) {
-            contacts = users[currentUser].contacts;
-        } else {
-            console.error('User not found:', currentUser);
+        console.log('Current user:', currentUser);
+        console.log('Is user logged in:', isUserLoggedIn);
+
+        let contacts = [];
+
+        // Load contacts from localStorage
+        let storedContacts = JSON.parse(localStorage.getItem('contacts'));
+        if (Array.isArray(storedContacts)) {
+            contacts = storedContacts;
         }
-    } else {
-        contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-    }
 
-    let contact = contacts.find(contact => contact.id === contactid);
+        console.log('Contacts array:', contacts);
 
-    if (contact) {
-        overlay = document.createElement("div");
+        // Find the contact with the given contactid
+        let contact = contacts.find(contact => contact.id === contactid);
+        if (!contact && isUserLoggedIn && currentUser.userId === contactid) {
+            contact = {
+                id: currentUser.userId,
+                name: `${currentUser.firstName} ${currentUser.lastName}`,
+                email: currentUser.email,
+                avatarid: 1,
+                phone: '' // assuming phone field, you might want to change this
+            };
+        }
+
+        console.log('Found contact:', contact);
+
+        if (!contact) {
+            console.log(`No contact found with ID ${contactid}.`);
+            return;
+        }
+
+        let overlay = document.createElement("div");
         overlay.id = "overlay";
         document.body.appendChild(overlay);
-        contactModal = document.createElement("div");
-        contactModal.id = "contactModal";
-        document.body.appendChild(contactModal);
-        contactModal.innerHTML += editcontact_innerHTML;
 
-        let avatarContainerDiv = document.createElement("div");
-        avatarContainerDiv.classList.add("avatar_container");
+        let contactModal = document.createElement("div");
+        contactModal.id = "contactModal";
         
-        let avatarDiv = document.createElement("div");
-        avatarDiv.classList.add("avatar_contactModal");
-        
-        let avatarHTML = `
-        <img class="avatar_contactModal" src="img/Ellipse5-${contact.avatarid}.svg"></img>
-        <div class="avatar_contactModal_initletter">${contact.name.charAt(0).toUpperCase()}</div>
+        let editcontact_innerHTML = `
+            <div class="avatar_container">
+                <div class="avatar_contactModal">
+                    <img class="avatar_contactModal" src="img/Ellipse5-${contact.avatarid}.svg"></img>
+                    <div class="avatar_contactModal_initletter">${contact.name.charAt(0).toUpperCase()}</div>
+                </div>
+            </div>
+            <div class="close_button1">
+                <img onclick="closeContactModal()" src="img/close.svg"></img>
+            </div>
+            <form id="editcontact_form" class="form_container">
+                <div class="input_container">
+                    <input type="text" class="textfield_newcontact" id="name" name="name" placeholder="Name" value="${contact.name}" pattern="^[a-zA-Z0-9_-]*$" title="Please enter only letters, numbers, hyphens, and underscores." required>
+                    <img src="img/person.svg" class="textfield_image">
+                </div>
+                <div class="input_container">
+                    <input type="email" class="textfield_newcontact" id="email" name="email" placeholder="Email" value="${contact.email}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" title="Please enter a valid email address." required>
+                    <img src="img/mail.svg" class="textfield_image">
+                </div>
+                <div class="input_container">
+                    <input type="text" class="textfield_newcontact" id="phone" name="phone" placeholder="Phone" value="${contact.phone}" pattern="^[+]?[0-9]*$" title="Please enter only numbers and optionally a plus sign at the beginning." required>
+                    <img src="img/call.svg" class="textfield_image">
+                </div>
+                <div class="button_container">
+                    <div class="delete_button" onclick="delContact('${contact.id}')">Delete<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="close"><mask id="mask0_126532_4110" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/></mask><g mask="url(#mask0_126532_4110)"><path id="close_2" d="M12 13.4L7.10005 18.3C6.91672 18.4834 6.68338 18.575 6.40005 18.575C6.11672 18.575 5.88338 18.4834 5.70005 18.3C5.51672 18.1167 5.42505 17.8834 5.42505 17.6C5.42505 17.3167 5.51672 17.0834 5.70005 16.9L10.6 12L5.70005 7.10005C5.51672 6.91672 5.42505 6.68338 5.42505 6.40005C5.42505 6.11672 5.51672 5.88338 5.70005 5.70005C5.88338 5.51672 6.11672 5.42505 6.40005 5.42505C6.68338 5.42505 6.91672 5.51672 7.10005 5.70005L12 10.6L16.9 5.70005C17.0834 5.51672 17.3167 5.42505 17.6 5.42505C17.8834 5.42505 18.1167 5.51672 18.3 5.70005C18.4834 5.88338 18.575 6.11672 18.575 6.40005C18.575 6.68338 18.4834 6.91672 18.3 7.10005L13.4 12L18.3 16.9C18.4834 17.0834 18.575 17.3167 18.575 17.6C18.575 17.8834 18.4834 18.1167 18.3 18.3C18.1167 18.4834 17.8834 18.575 17.6 18.575C17.3167 18.575 17.0834 18.4834 16.9 18.3L12 13.4Z" fill="#2A3647"/></g></g>
+                    </svg></div>
+                    <div class="createcontact_button hover-color" onclick="saveEditedContact('${contact.id}')">Save<img src="img/check.svg"></img></div>
+                </div>
+            </form>
         `;
         
-        avatarDiv.innerHTML += avatarHTML;
-        avatarContainerDiv.appendChild(avatarDiv);
-        contactModal.appendChild(avatarContainerDiv);
+        contactModal.innerHTML = editcontact_innerHTML;
 
-        let close_button1_DIV = document.createElement("div");
-        let close_button1_DIV_HTML = `<img class="close_button1" onclick="closeContactModal()" src="img/close.svg"></img>`;
+        document.body.appendChild(contactModal);
 
-        close_button1_DIV.innerHTML = close_button1_DIV_HTML;
-        contactModal.appendChild(close_button1_DIV);
-
-        let formDiv = document.createElement("div");
-
-        let editcontact_formHTML = `
-        <form id="editcontact_form" class="form_container">
-            <div class="input_container">
-                <input type="text" class="textfield_newcontact" id="name" name="name" placeholder="Name" value="${contact.name}" pattern="^[a-zA-Z0-9_-]*$" title="Bitte nur Buchstaben, Zahlen und die Sonderzeichen Bindestrich und Unterstrich eingeben." required>
-                <img src="img/person.svg" class="textfield_image">
-            </div>
-            <div class="input_container">
-                <input type="email" class="textfield_newcontact" id="email" name="email" placeholder="Email" value="${contact.email}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Bitte eine gültige E-Mail-Adresse eingeben." required>
-                <img src="img/mail.svg" class="textfield_image">
-            </div>
-            <div class="input_container">
-                <input type="text" class="textfield_newcontact" id="phone" name="phone" placeholder="Phone" value="${contact.phone}" pattern="^[+]?[0-9]*$" title="Bitte nur Zahlen und optional ein Pluszeichen am Anfang eingeben." required>
-                <img src="img/call.svg" class="textfield_image">
-            </div>
-            <div class="button_container">
-                <div class="delete_button" onclick="delContact('${contact.id}')">Delete<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="close"><mask id="mask0_126532_4110" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/></mask><g mask="url(#mask0_126532_4110)"><path id="close_2" d="M12 13.4L7.10005 18.3C6.91672 18.4834 6.68338 18.575 6.40005 18.575C6.11672 18.575 5.88338 18.4834 5.70005 18.3C5.51672 18.1167 5.42505 17.8834 5.42505 17.6C5.42505 17.3167 5.51672 17.0834 5.70005 16.9L10.6 12L5.70005 7.10005C5.51672 6.91672 5.42505 6.68338 5.42505 6.40005C5.42505 6.11672 5.51672 5.88338 5.70005 5.70005C5.88338 5.51672 6.11672 5.42505 6.40005 5.42505C6.68338 5.42505 6.91672 5.51672 7.10005 5.70005L12 10.6L16.9 5.70005C17.0834 5.51672 17.3167 5.42505 17.6 5.42505C17.8834 5.42505 18.1167 5.51672 18.3 5.70005C18.4834 5.88338 18.575 6.11672 18.575 6.40005C18.575 6.68338 18.4834 6.91672 18.3 7.10005L13.4 12L18.3 16.9C18.4834 17.0834 18.575 17.3167 18.575 17.6C18.575 17.8834 18.4834 18.1167 18.3 18.3C18.1167 18.4834 17.8834 18.575 17.6 18.575C17.3167 18.575 17.0834 18.4834 16.9 18.3L12 13.4Z" fill="#2A3647"/></g></g>
-                </svg></div>
-                <div class="createcontact_button hover-color" onclick="saveEditedContact('${contact.id}')">Save<img src="img/check.svg"></img></div>
-            </div>
-        </form>`;
-
-        contactModal.innerHTML += editcontact_formHTML;
-        contactModal.appendChild(formDiv);
+        // Display overlay and modal
         overlay.style.display = "block";
         contactModal.style.display = "block";
-        setTimeout(() => {
-            contactModal.classList.add('show');
-        }, 0);
-    }
-    else {
-        console.log(`No contact found with ID ${contactid}.`);
+
+    } catch (error) {
+        console.error('Error editing contact:', error);
     }
 }
 
@@ -396,7 +429,7 @@ async function saveEditedContact(contactid) {
             contact.name = name;
             contact.email = email;
             contact.phone = phone;
-            
+
             contacts.sort((a, b) => a.name.localeCompare(b.name));
             if (isUserLoggedIn) {
                 let users = JSON.parse(await getItem('users'));
@@ -468,7 +501,7 @@ window.showMoreMenu = showMoreMenu;
 function showMoreMenu(event) {
     let elements = document.querySelectorAll(".contact-editmenu_entriy_mobile, .contact-editmenu_mobile");
 
-    elements.forEach(function(element) {
+    elements.forEach(function (element) {
         let currentDisplay = window.getComputedStyle(element).display;
         if (currentDisplay === "none") {
             element.style.display = "flex";
@@ -502,7 +535,7 @@ function hideMenuOnClickOutside(event) {
         }
     }
 
-    elements.forEach(function(element) {
+    elements.forEach(function (element) {
         element.style.display = "none";
     });
 
@@ -579,8 +612,9 @@ async function floatingContactRender(contactid) {
                 }
             }
 
+            
             console.log('Sorted contacts:', contacts);
-        let floating_contactHTML = `
+            let floating_contactHTML = `
         <div class="floating_contact">
             <div class="floating_contact_avatar">
                 <img src="img/Ellipse5-${contact.avatarid}.svg"></img>
@@ -630,7 +664,7 @@ async function floatingContactRender(contactid) {
         </div>
         `;
 
-        let floating_contactElement = document.getElementById("floating_contact");
+            let floating_contactElement = document.getElementById("floating_contact");
 
             while (floating_contactElement.firstChild) {
                 floating_contactElement.removeChild(floating_contactElement.firstChild);
@@ -645,7 +679,7 @@ async function floatingContactRender(contactid) {
     } catch (error) {
         console.error('Error rendering floating contact:', error);
     }
-} 
+}
 
 /**
  * This function is called when the contacts page is loaded. 
@@ -661,6 +695,6 @@ document.addEventListener('DOMContentLoaded', async (event) => {
  * It hides the floating contact window.
  * only for mobile visible
  */
-window.addEventListener('resize', function() {
+window.addEventListener('resize', function () {
     isMobile = window.innerWidth <= 1385;
 });
