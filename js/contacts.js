@@ -308,103 +308,112 @@ window.editContact = editContact;
  * @param {*} contactid
  */
 async function editContact(contactid) {
-    try {
-        // Check if the user is logged in
-        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        let isUserLoggedIn = !!currentUser;
 
-        console.log('Current user:', currentUser);
-        console.log('Is user logged in:', isUserLoggedIn);
+    let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    let isUserLoggedIn = !!currentUser;
 
-        let contacts = [];
+    console.log('Current user:', currentUser);
+    console.log('Is user logged in:', isUserLoggedIn);
 
-        // Load contacts from localStorage
-        let storedContacts = JSON.parse(localStorage.getItem('contacts'));
-        if (Array.isArray(storedContacts)) {
-            contacts = storedContacts;
-        }
+    let contacts = [];
 
-        console.log('Contacts array:', contacts);
+    console.log('Current User:', currentUser);
 
-        // Check if the currentUser is already in contacts
-        if (isUserLoggedIn) {
-            let currentUserContact = {
-                id: currentUser.userId.toString(), // Convert to string for consistent comparison
-                name: `${currentUser.firstName} ${currentUser.lastName}`,
-                email: currentUser.email,
-                avatarid: 1, // Adjust the avatar ID accordingly
-                phone: '' // Assuming phone field, adjust if necessary
-            };
+     // Load contacts from localStorage
+     let storedContacts = JSON.parse(localStorage.getItem('contacts'));
+     if (Array.isArray(storedContacts)) {
+         contacts = storedContacts;
+     }
 
-            let existingUserIndex = contacts.findIndex(contact => contact.id.toString() === currentUserContact.id);
-            if (existingUserIndex === -1) {
-                contacts.push(currentUserContact);
-            }
-        }
+     console.log('Contacts array:', contacts);
 
-        console.log('Updated Contacts array:', contacts);
+     // Check if the currentUser is already in contacts
+     if (isUserLoggedIn) {
+         let currentUserContact = {
+             id: currentUser.userId.toString(), // Convert to string for consistent comparison
+             name: `${currentUser.firstName} ${currentUser.lastName}`,
+             email: currentUser.email,
+             avatarid: 1, // Adjust the avatar ID accordingly
+             phone: '' // Assuming phone field, adjust if necessary
+         };
 
-        // Convert contactid to a string for consistent comparison
-        contactid = contactid.toString();
+         let existingUserIndex = contacts.findIndex(contact => contact.id.toString() === currentUserContact.id);
+         if (existingUserIndex === -1) {
+             contacts.push(currentUserContact);
+         }
+     }
 
-        // Find the contact with the given contactid
-        let contact = contacts.find(contact => contact.id.toString() === contactid);
+    // Ensure contacts is initialized or handle appropriately
+    if (!contacts) {
+        console.error('Contacts not initialized or empty.');
+        return;
+    }
 
-        console.log('Found contact:', contact);
+    let contact = contacts.find(contact => contact.id === contactid);
 
-        if (!contact) {
-            console.log(`No contact found with ID ${contactid}.`);
-            return;
-        }
-
-        let overlay = document.createElement("div");
+    if (contact) {
+        overlay = document.createElement("div");
         overlay.id = "overlay";
         document.body.appendChild(overlay);
-
-        let contactModal = document.createElement("div");
+        contactModal = document.createElement("div");
         contactModal.id = "contactModal";
-        
-        let editcontact_innerHTML = `
-            <div class="avatar_container">
-                <div class="avatar_contactModal">
-                    <img class="avatar_contactModal" src="img/Ellipse5-${contact.avatarid}.svg"></img>
-                    <div class="avatar_contactModal_initletter">${contact.name.charAt(0).toUpperCase()}</div>
-                </div>
-            </div>
-            <div class="close_button1">
-                <img onclick="closeContactModal()" src="img/close.svg"></img>
-            </div>
-            <form id="editcontact_form" class="form_container">
-                <div class="input_container">
-                    <input type="text" class="textfield_newcontact" id="name" name="name" placeholder="Name" value="${contact.name}" pattern="^[a-zA-Z0-9_-]*$" title="Please enter only letters, numbers, hyphens, and underscores." required>
-                    <img src="img/person.svg" class="textfield_image">
-                </div>
-                <div class="input_container">
-                    <input type="email" class="textfield_newcontact" id="email" name="email" placeholder="Email" value="${contact.email}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" title="Please enter a valid email address." required>
-                    <img src="img/mail.svg" class="textfield_image">
-                </div>
-                <div class="input_container">
-                    <input type="text" class="textfield_newcontact" id="phone" name="phone" placeholder="Phone" value="${contact.phone}" pattern="^[+]?[0-9]*$" title="Please enter only numbers and optionally a plus sign at the beginning." required>
-                    <img src="img/call.svg" class="textfield_image">
-                </div>
-                <div class="button_container">
-                    <div class="delete_button" onclick="delContact('${contact.id}')">Delete<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="close"><mask id="mask0_126532_4110" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/></mask><g mask="url(#mask0_126532_4110)"><path id="close_2" d="M12 13.4L7.10005 18.3C6.91672 18.4834 6.68338 18.575 6.40005 18.575C6.11672 18.575 5.88338 18.4834 5.70005 18.3C5.51672 18.1167 5.42505 17.8834 5.42505 17.6C5.42505 17.3167 5.51672 17.0834 5.70005 16.9L10.6 12L5.70005 7.10005C5.51672 6.91672 5.42505 6.68338 5.42505 6.40005C5.42505 6.11672 5.51672 5.88338 5.70005 5.70005C5.88338 5.51672 6.11672 5.42505 6.40005 5.42505C6.68338 5.42505 6.91672 5.51672 7.10005 5.70005L12 10.6L16.9 5.70005C17.0834 5.51672 17.3167 5.42505 17.6 5.42505C17.8834 5.42505 18.1167 5.51672 18.3 5.70005C18.4834 5.88338 18.575 6.11672 18.575 6.40005C18.575 6.68338 18.4834 6.91672 18.3 7.10005L13.4 12L18.3 16.9C18.4834 17.0834 18.575 17.3167 18.575 17.6C18.575 17.8834 18.4834 18.1167 18.3 18.3C18.1167 18.4834 17.8834 18.575 17.6 18.575C17.3167 18.575 17.0834 18.4834 16.9 18.3L12 13.4Z" fill="#2A3647"/></g></g>
-                    </svg></div>
-                    <div class="createcontact_button hover-color" onclick="saveEditedContact('${contact.id}', currentUser)">Save<img src="img/check.svg"></img></div>
-                </div>
-            </form>
-        `;
-        
-        contactModal.innerHTML = editcontact_innerHTML;
-
         document.body.appendChild(contactModal);
+        contactModal.innerHTML += editcontact_innerHTML;
 
-        // Display overlay and modal
+        let avatarContainerDiv = document.createElement("div");
+        avatarContainerDiv.classList.add("avatar_container");
+
+        let avatarDiv = document.createElement("div");
+        avatarDiv.classList.add("avatar_contactModal");
+
+        let avatarHTML = `
+        <img class="avatar_contactModal" src="img/Ellipse5-${contact.avatarid}.svg"></img>
+        <div class="avatar_contactModal_initletter">${contact.name.charAt(0).toUpperCase()}</div>
+        `;
+
+        avatarDiv.innerHTML += avatarHTML;
+        avatarContainerDiv.appendChild(avatarDiv);
+        contactModal.appendChild(avatarContainerDiv);
+
+        let close_button1_DIV = document.createElement("div");
+        let close_button1_DIV_HTML = `<img class="close_button1" onclick="closeContactModal()" src="img/close.svg"></img>`;
+
+        close_button1_DIV.innerHTML = close_button1_DIV_HTML;
+        contactModal.appendChild(close_button1_DIV);
+
+        let formDiv = document.createElement("div");
+
+        let editcontact_formHTML = `
+        <form id="editcontact_form" class="form_container">
+            <div class="input_container">
+                <input type="text" class="textfield_newcontact" id="name" name="name" placeholder="Name" value="${contact.name}" pattern="^[a-zA-Z0-9_-]*$" title="Bitte nur Buchstaben, Zahlen und die Sonderzeichen Bindestrich und Unterstrich eingeben." required>
+                <img src="img/person.svg" class="textfield_image">
+            </div>
+            <div class="input_container">
+                <input type="email" class="textfield_newcontact" id="email" name="email" placeholder="Email" value="${contact.email}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Bitte eine gültige E-Mail-Adresse eingeben." required>
+                <img src="img/mail.svg" class="textfield_image">
+            </div>
+            <div class="input_container">
+                <input type="text" class="textfield_newcontact" id="phone" name="phone" placeholder="Phone" value="${contact.phone}" pattern="^[+]?[0-9]*$" title="Bitte nur Zahlen und optional ein Pluszeichen am Anfang eingeben." required>
+                <img src="img/call.svg" class="textfield_image">
+            </div>
+            <div class="button_container">
+                <div class="delete_button" onclick="delContact('${contact.id}')">Delete<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="close"><mask id="mask0_126532_4110" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/></mask><g mask="url(#mask0_126532_4110)"><path id="close_2" d="M12 13.4L7.10005 18.3C6.91672 18.4834 6.68338 18.575 6.40005 18.575C6.11672 18.575 5.88338 18.4834 5.70005 18.3C5.51672 18.1167 5.42505 17.8834 5.42505 17.6C5.42505 17.3167 5.51672 17.0834 5.70005 16.9L10.6 12L5.70005 7.10005C5.51672 6.91672 5.42505 6.68338 5.42505 6.40005C5.42505 6.11672 5.51672 5.88338 5.70005 5.70005C5.88338 5.51672 6.11672 5.42505 6.40005 5.42505C6.68338 5.42505 6.91672 5.51672 7.10005 5.70005L12 10.6L16.9 5.70005C17.0834 5.51672 17.3167 5.42505 17.6 5.42505C17.8834 5.42505 18.1167 5.51672 18.3 5.70005C18.4834 5.88338 18.575 6.11672 18.575 6.40005C18.575 6.68338 18.4834 6.91672 18.3 7.10005L13.4 12L18.3 16.9C18.4834 17.0834 18.575 17.3167 18.575 17.6C18.575 17.8834 18.4834 18.1167 18.3 18.3C18.1167 18.4834 17.8834 18.575 17.6 18.575C17.3167 18.575 17.0834 18.4834 16.9 18.3L12 13.4Z" fill="#2A3647"/></g></g>
+                </svg></div>
+                <div class="createcontact_button hover-color" onclick="saveEditedContact('${contact.id}')">Save<img src="img/check.svg"></img></div>
+            </div>
+        </form>`;
+
+        contactModal.innerHTML += editcontact_formHTML;
+        contactModal.appendChild(formDiv);
         overlay.style.display = "block";
         contactModal.style.display = "block";
-
-    } catch (error) {
-        console.error('Error editing contact:', error);
+        setTimeout(() => {
+            contactModal.classList.add('show');
+        }, 0);
+    }
+    else {
+        console.log(`No contact found with ID ${contactid}.`);
     }
 }
 
@@ -415,55 +424,68 @@ window.saveEditedContact = saveEditedContact;
  * This function is called when the user clicks on the "Save" button in the modal window. It saves the edited contact to the local storage.
  * @param {*} contactid
  */
-async function saveEditedContact(contactid) {
+async function saveEditedContact(contactid, currentUser) {
     let form = document.getElementById('editcontact_form');
+    if (!form) {
+        console.error('Form element not found.');
+        return;
+    }
+
+    let isUserLoggedIn = !!currentUser;
 
     if (form.checkValidity()) {
-        let contacts;
+        try {
+            let contacts;
 
-        if (isUserLoggedIn) {
-            let users = JSON.parse(await getItem('users'));
-            if (users[currentUser]) {
-                contacts = users[currentUser].contacts;
-            } else {
-                console.error(`No contact found with ID ${contactid}.`);
-            }
-        } else {
-            contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-        }
-
-        let contact = contacts.find(contact => contact.id === contactid);
-
-        if (contact) {
-            let name = document.getElementById('name').value;
-            let email = document.getElementById('email').value;
-            let phone = document.getElementById('phone').value;
-
-            contact.name = name;
-            contact.email = email;
-            contact.phone = phone;
-
-            contacts.sort((a, b) => a.name.localeCompare(b.name));
-            if (isUserLoggedIn) {
+            if (isUserLoggedIn && currentUser.userId) {
                 let users = JSON.parse(await getItem('users'));
-                users[currentUser].contacts = contacts;
-                await setItem('users', JSON.stringify(users));
+                if (users[currentUser.userId]) {
+                    contacts = users[currentUser.userId].contacts;
+                } else {
+                    console.error(`No contacts found for user with ID ${currentUser.userId}.`);
+                    return;
+                }
             } else {
-                localStorage.setItem('contacts', JSON.stringify(contacts));
+                contacts = JSON.parse(localStorage.getItem('contacts')) || [];
             }
 
-            closeContactModal();
+            // Find the contact with the specified ID (converted to string for consistency)
+            contactid = contactid.toString();
+            let contact = contacts.find(contact => contact.id === contactid);
 
-            reloadContacts();
-            floatingContactRender(contactid);
-        }
-        else {
-            console.log(`No contact found with ID ${contactid}.`);
+            if (contact) {
+                // Update contact details
+                contact.name = document.getElementById('name').value;
+                contact.email = document.getElementById('email').value;
+                contact.phone = document.getElementById('phone').value;
+
+                // Sort contacts by name
+                contacts.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Update local storage or backend storage based on user login status
+                if (isUserLoggedIn && currentUser.userId) {
+                    let users = JSON.parse(await getItem('users'));
+                    users[currentUser.userId].contacts = contacts;
+                    await setItem('users', JSON.stringify(users));
+                } else {
+                    localStorage.setItem('contacts', JSON.stringify(contacts));
+                }
+
+                // Close modal, reload contacts list, and update UI
+                closeContactModal();
+                reloadContacts();
+                floatingContactRender(contactid);
+            } else {
+                console.log(`No contact found with ID ${contactid}.`);
+            }
+        } catch (error) {
+            console.error('Error saving edited contact:', error);
         }
     } else {
         form.reportValidity();
     }
 }
+
 
 window.delContact = delContact;
 
@@ -625,7 +647,7 @@ async function floatingContactRender(contactid) {
                 }
             }
 
-            
+
             console.log('Sorted contacts:', contacts);
             let floating_contactHTML = `
         <div class="floating_contact">

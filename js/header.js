@@ -30,6 +30,10 @@ async function loadUsers() {
  * Show first letter of username
  */
 async function userInitials() {
+    // Dummy promise to simulate async behavior
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')); // Ensure currentUser is loaded from local storage
     let usernameFirstLetter = '';
 
     if (currentUser && currentUser.username) {
@@ -45,6 +49,16 @@ async function userInitials() {
         console.error("Element with id 'header-username' not found");
         console.log("Current DOM:", document.body.innerHTML);
     }
+}
+
+// Hypothetical async function to simulate fetching current user data
+async function fetchCurrentUser() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            currentUser = { username: 'exampleUser' }; // Simulating a fetched user
+            resolve();
+        }, 1000); // Simulate 1 second delay
+    });
 }
 
 /**
